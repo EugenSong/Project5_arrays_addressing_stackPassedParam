@@ -1,16 +1,18 @@
-Microsoft (R) Macro Assembler Version 14.29.30138.0	    01/23/22 10:54:23
-'Dog Years Calculator     (DogYears.asm			     Page 1 - 1
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/23/22 19:42:30
+<Arrays, Addressing, and Stack-Passed Parameters     (Proj5_  Page 1 - 1
 
 
-				TITLE Dog Years Calculator     (DogYears.asm)
+				TITLE Arrays, Addressing, and Stack-Passed Parameters     (Proj5_songeu.asm)
 
 				; Author: Eugene Song
-				; Last Modified: Now
-				; OSU email address: ONID_ID@oregonstate.edu
-				; Course number/section:   CS271 Section ???
-				; Project Number:  Project 00              Due Date: Never
-				; Description: This file is provided as a template from which you may work
-				;              when developing assembly projects in CS271.
+				; Last Modified: February 23, 2022
+				; OSU email address: songeu@oregonstate.edu
+				; Course number/section:   CS271 Section 400
+				; Project Number: 5             Due Date: February 27, 2022
+				; Description: This program will introduce the program and the author. Then it will provide a description
+				;					of what the program will do. It will generate 200 random numbers between a range from
+				;						10 through 29, sort the list, display the medium value, display the list in ascending 
+				;							order and finally display the number of instances of each value in the list. 
 
 				INCLUDE Irvine32.inc
 			      C ; Include file for Irvine32.lib             (Irvine32.inc)
@@ -31,117 +33,176 @@ Microsoft (R) Macro Assembler Version 14.29.30138.0	    01/23/22 10:54:23
 			      C .LIST
 			      C 
 
-				; (insert macro definitions here)
+ = 000000C8			ARRAYSIZE = 200
+ = 0000000F			LO = 15
+ = 00000032			HI = 50 
 
-				; (insert constant definitions here)
- = 00000007			DOG_FACTOR = 7 
 
  00000000			.data
 
-				; (insert variable definitions here)
+ 00000000 54 68 65 20 42		intro1			BYTE	"The Birth of Sorted Random Number Integers! By Eugene",13,10,13,10, 0
+	   69 72 74 68 20
+	   6F 66 20 53 6F
+	   72 74 65 64 20
+	   52 61 6E 64 6F
+	   6D 20 4E 75 6D
+	   62 65 72 20 49
+	   6E 74 65 67 65
+	   72 73 21 20 42
+	   79 20 45 75 67
+	   65 6E 65 0D 0A
+	   0D 0A 00
+ 0000003A 54 68 69 73 20		intro2			BYTE	"This program generates 200 random numbers in the range [15 ... 50], displays the ",13,10
+	   70 72 6F 67 72
+	   61 6D 20 67 65
+	   6E 65 72 61 74
+	   65 73 20 32 30
+	   30 20 72 61 6E
+	   64 6F 6D 20 6E
+	   75 6D 62 65 72
+	   73 20 69 6E 20
+	   74 68 65 20 72
+	   61 6E 67 65 20
+	   5B 31 35 20 2E
+	   2E 2E 20 35 30
+	   5D 2C 20 64 69
+	   73 70 6C 61 79
+	   73 20 74 68 65
+	   20 0D 0A
+ 0000008D  6F 72 69 67 69						BYTE	"original list, sorts the list, displays the median value of the list, displays the ",13,10
+	   6E 61 6C 20 6C
+	   69 73 74 2C 20
+	   73 6F 72 74 73
+	   20 74 68 65 20
+	   6C 69 73 74 2C
+	   20 64 69 73 70
+	   6C 61 79 73 20
+	   74 68 65 20 6D
+	   65 64 69 61 6E
+	   20 76 61 6C 75
+	   65 20 6F 66 20
+	   74 68 65 20 6C
+	   69 73 74 2C 20
+	   64 69 73 70 6C
+	   61 79 73 20 74
+	   68 65 20 0D 0A
+ 000000E2  6C 69 73 74 20						BYTE	"list sorted in ascending order, then displays the number of instances of each ",13,10 
+	   73 6F 72 74 65
+	   64 20 69 6E 20
+	   61 73 63 65 6E
+	   64 69 6E 67 20
+	   6F 72 64 65 72
+	   2C 20 74 68 65
+	   6E 20 64 69 73
+	   70 6C 61 79 73
+	   20 74 68 65 20
+	   6E 75 6D 62 65
+	   72 20 6F 66 20
+	   69 6E 73 74 61
+	   6E 63 65 73 20
+	   6F 66 20 65 61
+	   63 68 20 0D 0A
+ 00000132  67 65 6E 65 72						BYTE	"generated value, starting with the number of 10s.",13,10,13,10,0
+	   61 74 65 64 20
+	   76 61 6C 75 65
+	   2C 20 73 74 61
+	   72 74 69 6E 67
+	   20 77 69 74 68
+	   20 74 68 65 20
+	   6E 75 6D 62 65
+	   72 20 6F 66 20
+	   31 30 73 2E 0D
+	   0A 0D 0A 00
+ 00000168 59 6F 75 72 20		unsorted_label	BYTE	"Your unsorted random numbers:",13,10, 0
+	   75 6E 73 6F 72
+	   74 65 64 20 72
+	   61 6E 64 6F 6D
+	   20 6E 75 6D 62
+	   65 72 73 3A 0D
+	   0A 00
+ 00000188 54 68 65 20 6D		median_label	BYTE	"The median value of the array: ", 13,10,0 
+	   65 64 69 61 6E
+	   20 76 61 6C 75
+	   65 20 6F 66 20
+	   74 68 65 20 61
+	   72 72 61 79 3A
+	   20 0D 0A 00
+ 000001AA 59 6F 75 72 20		sorted_label	BYTE	"Your sorted random numbers:", 13,10, 0 
+	   73 6F 72 74 65
+	   64 20 72 61 6E
+	   64 6F 6D 20 6E
+	   75 6D 62 65 72
+	   73 3A 0D 0A 00
+ 000001C8 59 6F 75 72 20		instance_label	BYTE	"Your list of instances of each generated number, starting with the number of 10s:",13,10, 0
+	   6C 69 73 74 20
+	   6F 66 20 69 6E
+	   73 74 61 6E 63
+	   65 73 20 6F 66
+	   20 65 61 63 68
+	   20 67 65 6E 65
+	   72 61 74 65 64
+	   20 6E 75 6D 62
+	   65 72 2C 20 73
+	   74 61 72 74 69
+	   6E 67 20 77 69
+	   74 68 20 74 68
+	   65 20 6E 75 6D
+	   62 65 72 20 6F
+	   66 20 31 30 73
+	   3A 0D 0A 00
+ 0000021C 47 6F 6F 64 62		farewell_msg	BYTE	"Goodbye, and thanks for coming!", 13,10, 0 
+	   79 65 2C 20 61
+	   6E 64 20 74 68
+	   61 6E 6B 73 20
+	   66 6F 72 20 63
+	   6F 6D 69 6E 67
+	   21 0D 0A 00
 
- 00000000  00000021 [		userName BYTE 33 DUP(0) ; string is length 33 and filled with 0's AND entered by user 
-	    00
-	   ]
- 00000021 00000000		userAge DWORD ?			; integer to be entered by user 
- 00000025 48 69 20 2C 20	intro_1 BYTE "Hi , my name is Lassie, and I'm here to tell you your age", 0
-	   6D 79 20 6E 61
-	   6D 65 20 69 73
-	   20 4C 61 73 73
-	   69 65 2C 20 61
-	   6E 64 20 49 27
-	   6D 20 68 65 72
-	   65 20 74 6F 20
-	   74 65 6C 6C 20
-	   79 6F 75 20 79
-	   6F 75 72 20 61
-	   67 65 00
- 0000005F 57 68 61 74 20	prompt_1 BYTE "What is your name?", 0  ; 0 is to "null terminate" strings to indicate where string ends 
-	   69 73 20 79 6F
-	   75 72 20 6E 61
-	   6D 65 3F 00
- 00000072 4E 69 63 65 20	intro_2 BYTE "Nice to meet you, ", 0
-	   74 6F 20 6D 65
-	   65 74 20 79 6F
-	   75 2C 20 00
- 00000085 57 68 61 74 20	prompt_2 BYTE "What is your age?", 0 
-	   69 73 20 79 6F
-	   75 72 20 61 67
-	   65 3F 00
- 00000097 00000000		dogAge DWORD ?			; to be calculated... 
- 0000009B 57 6F 77 2C 20	result_1 BYTE "Wow, that's ", 0
-	   74 68 61 74 27
-	   73 20 00
- 000000A8 20 69 6E 20 64	result_2 BYTE " in dog years!", 0 
-	   6F 67 20 79 65
-	   61 72 73 21 00
- 000000B7 53 6F 20 6C 6F	goodBye BYTE "So long and farewell, ", 0 
-	   6E 67 20 61 6E
-	   64 20 66 61 72
-	   65 77 65 6C 6C
-	   2C 20 00
+
 
  00000000			.code
  00000000			main PROC
 
-				; Introduce programmer 
+				;	CALL Randomize			; random seed
 
- 00000000  BA 00000025 R		mov		EDX, OFFSET intro_1
- 00000005  E8 00000000 E		call	WriteString
- 0000000A  E8 00000000 E		call	CrLf ; equivalent to insert newline 
+ 00000000  68 00000000 R		PUSH	OFFSET intro1	; push intro1 to stack
+ 00000005  68 0000003A R		PUSH	OFFSET intro2	; push intro2 to stack
+ 0000000A  E8 00000007			CALL introduction
 
-				; Get user's name 
-					
- 0000000F  BA 0000005F R		mov		EDX, OFFSET prompt_1
- 00000014  E8 00000000 E		call	WriteString ; WriteString is equivalent to print 
-					; preconditions of ReadString: (1) max length saved in EDX, EDX holds pointer to string 
- 00000019  BA 00000000 R		mov		EDX, OFFSET userName
- 0000001E  B9 00000021			mov		ECX, 33 
- 00000023  E8 00000000 E		call	ReadString
+					; fillArray
+					; sortList
+					; exchangeElements
+					; displayMedian 
+					; displayList
+					; countList 
 
-				; Get user's age
- 00000028  BA 00000085 R		mov		EDX, OFFSET prompt_2
- 0000002D  E8 00000000 E		call	WriteString
-					; preconditions of ReadDec: none 
- 00000032  E8 00000000 E		call	ReadDec
-					; postconditions of ReadDec: value is saved in EAX 
- 00000037  A3 00000021 R		mov		userAge, EAX ; move EAX into userAge
-
-				; Calculate age in dog years 
-					
- 0000003C  A1 00000021 R		mov		EAX, userAge 
- 00000041  BB 00000007			mov		EBX, DOG_FACTOR
- 00000046  F7 E3			mul		EBX				; (mul always multiplies EAX)by EBX 
- 00000048  A3 00000097 R		mov		dogAge, EAX
-
-				; report result
- 0000004D  BA 0000009B R		mov		EDX, OFFSET result_1
- 00000052  E8 00000000 E		call	WriteString
- 00000057  A1 00000097 R		mov		EAX, dogAge
- 0000005C  E8 00000000 E		call	WriteDec ; use WriteDec instead of WriteInt b/c unsigned value 
- 00000061  BA 000000A8 R		mov		EDX, OFFSET result_2
- 00000066  E8 00000000 E		call	WriteString 
- 0000006B  E8 00000000 E		call	CrLf
-
-
-				; say goodbye 
-
- 00000070  BA 000000B7 R		mov		EDX, OFFSET goodbye
- 00000075  E8 00000000 E		call	WriteString 
- 0000007A  BA 00000000 R		mov		EDX, OFFSET userName
- 0000007F  E8 00000000 E		call	WriteString 
- 00000084  E8 00000000 E		call	CrLf
 
 					Invoke ExitProcess,0	; exit to operating system
- 00000089  6A 00	   *	    push   +000000000h
- 0000008B  E8 00000000 E   *	    call   ExitProcess
- 00000090			main ENDP
+ 0000000F  6A 00	   *	    push   +000000000h
+ 00000011  E8 00000000 E   *	    call   ExitProcess
+ 00000016			main ENDP
 
-				; (insert additional procedures here)
+ 00000016			introduction PROC
+
+ 00000016  55				PUSH  EBP				; Step 1) Preserve EBP
+ 00000017  8B EC			MOV   EBP, ESP			; Step 2) Assign static stack-frame pointer
+
+ 00000019  8B 54 24 0C			MOV		EDX, [ESP+12]
+ 0000001D  E8 00000000 E		CALL	WriteString
+ 00000022  33 D2			xor		EDX, EDX
+ 00000024  8B 54 24 08			mov		EDX, [ESP+8]
+ 00000028  E8 00000000 E		CALL	WriteString
+ 0000002D  33 D2			xor		EDX, EDX
+					
+ 0000002F  5D				pop		EBP
+
+ 00000030  C2 0008			RET		8
+
+ 00000033			introduction ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.29.30138.0	    01/23/22 10:54:23
-'Dog Years Calculator     (DogYears.asm			     Symbols 2 - 1
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/23/22 19:42:30
+<Arrays, Addressing, and Stack-Passed Parameters     (Proj5_  Symbols 2 - 1
 
 
 
@@ -234,8 +295,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000000CE Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000090 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000023E Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000033 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -342,7 +403,8 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000090 Public STDCALL
+introduction . . . . . . . . . .	P Near	 00000016 _TEXT	Length= 0000001D Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000016 Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -362,12 +424,12 @@ Symbols:
 @fardata . . . . . . . . . . . .	Text   	 FLAT
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 ALT_MASK . . . . . . . . . . . .	Number	 00000003h   
+ARRAYSIZE  . . . . . . . . . . .	Number	 000000C8h   
 CAPSLOCK_ON  . . . . . . . . . .	Number	 00000080h   
 CREATE_ALWAYS  . . . . . . . . .	Number	 00000002h   
 CREATE_NEW . . . . . . . . . . .	Number	 00000001h   
 CTRL_MASK  . . . . . . . . . . .	Number	 0000000Ch   
 CreateFile . . . . . . . . . . .	Text   	 CreateFileA
-DOG_FACTOR . . . . . . . . . . .	Number	 00000007h   
 DO_NOT_SHARE . . . . . . . . . .	Number	 00000000h   
 ENABLE_ECHO_INPUT  . . . . . . .	Number	 00000004h   
 ENABLE_LINE_INPUT  . . . . . . .	Number	 00000002h   
@@ -417,6 +479,7 @@ HEAP_GROWABLE  . . . . . . . . .	Number	 00000002h
 HEAP_NO_SERIALIZE  . . . . . . .	Number	 00000001h   
 HEAP_REALLOC_IN_PLACE_ONLY . . .	Number	 00000010h   
 HEAP_ZERO_MEMORY . . . . . . . .	Number	 00000008h   
+HI . . . . . . . . . . . . . . .	Number	 00000032h   
 IDABORT  . . . . . . . . . . . .	Number	 00000003h   
 IDCANCEL . . . . . . . . . . . .	Number	 00000002h   
 IDCLOSE  . . . . . . . . . . . .	Number	 00000008h   
@@ -435,6 +498,7 @@ KEY_EVENT  . . . . . . . . . . .	Number	 00000001h
 KEY_MASKS  . . . . . . . . . . .	Number	 0000001Fh   
 LEFT_ALT_PRESSED . . . . . . . .	Number	 00000002h   
 LEFT_CTRL_PRESSED  . . . . . . .	Number	 00000008h   
+LO . . . . . . . . . . . . . . .	Number	 0000000Fh   
 MB_ABORTRETRYIGNORE  . . . . . .	Number	 00000002h   
 MB_APPLMODAL . . . . . . . . . .	Number	 00000000h   
 MB_CANCELTRYCONTINUE . . . . . .	Number	 00000006h   
@@ -566,13 +630,13 @@ black  . . . . . . . . . . . . .	Number	 00000000h
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
-dogAge . . . . . . . . . . . . .	DWord	 00000097 _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
-goodBye  . . . . . . . . . . . .	Byte	 000000B7 _DATA	
+farewell_msg . . . . . . . . . .	Byte	 0000021C _DATA	
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
-intro_1  . . . . . . . . . . . .	Byte	 00000025 _DATA	
-intro_2  . . . . . . . . . . . .	Byte	 00000072 _DATA	
+instance_label . . . . . . . . .	Byte	 000001C8 _DATA	
+intro1 . . . . . . . . . . . . .	Byte	 00000000 _DATA	
+intro2 . . . . . . . . . . . . .	Byte	 0000003A _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
 lightGray  . . . . . . . . . . .	Number	 00000007h   
@@ -580,13 +644,10 @@ lightGreen . . . . . . . . . . .	Number	 0000000Ah
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
-prompt_1 . . . . . . . . . . . .	Byte	 0000005F _DATA	
-prompt_2 . . . . . . . . . . . .	Byte	 00000085 _DATA	
+median_label . . . . . . . . . .	Byte	 00000188 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-result_1 . . . . . . . . . . . .	Byte	 0000009B _DATA	
-result_2 . . . . . . . . . . . .	Byte	 000000A8 _DATA	
-userAge  . . . . . . . . . . . .	DWord	 00000021 _DATA	
-userName . . . . . . . . . . . .	Byte	 00000000 _DATA	
+sorted_label . . . . . . . . . .	Byte	 000001AA _DATA	
+unsorted_label . . . . . . . . .	Byte	 00000168 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
