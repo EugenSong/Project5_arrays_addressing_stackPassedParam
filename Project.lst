@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/23/22 23:56:04
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/24/22 14:15:16
 <Arrays, Addressing, and Stack-Passed Parameters     (Proj5_  Page 1 - 1
 
 
@@ -218,47 +218,53 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/23/22 23:56:04
  00000048  55				PUSH	EBP				; Step 1) Preserve EBP
  00000049  8B EC			MOV		EBP, ESP		; Step 2) Assign static stack-frame pointer
 
-					; generate random numbers
- 0000004B  B9 00000064			MOV		ECX, 100
- 00000050			_loopMe:
+					; generate 200 random numbers
 
- 00000050  B8 00000032			MOV		EAX, HI			; upper bound
- 00000055  83 C0 01			ADD		EAX, 1			; EAX + 1 to include upper range
- 00000058  E8 00000000 E		CALL	RandomRange		; takes EAX (upper); outputs new EAX 
- 0000005D  BB 0000000F			MOV		EBX, LO
- 00000062  50				PUSH	EAX				; store seed value --> stack
- 00000063  B8 00000032			MOV		EAX, HI
- 00000068  83 C0 01			ADD		EAX, 1			; to include upper range again
- 0000006B  2B C3			SUB		EAX, EBX		; upper - lower --> EAX
+ 0000004B  33 C9			XOR		ECX, ECX
+ 0000004D			_loopMe:
 
-						; switch EAX / EBX
- 0000006D  8B D8			MOV		EBX, EAX
- 0000006F  58				POP		EAX				; popped off seed --> EAX 
+ 0000004D  B8 00000032			MOV		EAX, HI			; upper bound
+ 00000052  83 C0 01			ADD		EAX, 1			; EAX + 1 to include upper range
+ 00000055  E8 00000000 E		CALL	RandomRange		; takes EAX (upper); outputs new EAX 
+ 0000005A  BB 0000000F			MOV		EBX, LO
+ 0000005F  50				PUSH	EAX				; store seed value --> stack
+ 00000060  B8 00000032			MOV		EAX, HI
+ 00000065  83 C0 01			ADD		EAX, 1			; to include upper range again
+ 00000068  2B C3			SUB		EAX, EBX		; upper - lower --> EAX
+
+						; switch EAX / EBX to prepare for div
+ 0000006A  8B D8			MOV		EBX, EAX
+ 0000006C  58				POP		EAX				; popped off seed --> EAX 
 
 						; EAX (seed) / EBX (upper-lower) at this point
- 00000070  33 D2			XOR		EDX, EDX
- 00000072  F7 F3			DIV		EBX				; randomNum = seed % (upper-lower) + lower
+ 0000006D  33 D2			XOR		EDX, EDX
+ 0000006F  F7 F3			DIV		EBX				; randomNum = seed % (upper-lower) + lower
 
- 00000074  BB 0000000F			MOV		EBX, LO
- 00000079  03 D3			ADD		EDX, EBX		
+ 00000071  BB 0000000F			MOV		EBX, LO
+ 00000076  03 D3			ADD		EDX, EBX		
 						; at this point, EDX has the randomNum btwn LO & HI
 
- 0000007B  8B C2			MOV		EAX, EDX
- 0000007D  E8 00000000 E		CALL	WriteDec
- 00000082  E8 00000000 E		CALL	CrLf
-					; store into array
+ 00000078  8B C2			MOV		EAX, EDX		; EAX has randomNum btwn LO & HI
+ 0000007A  E8 00000000 E		CALL	WriteDec
+ 0000007F  E8 00000000 E		CALL	CrLf
 
- 00000087  E2 C7			LOOP _loopMe
-					
+					; store/fill in array
+ 00000084  8B 7C 24 08			MOV		EDI, [ESP+8]			; reference 1st address of someArray
+ 00000088  89 04 8F			MOV		[EDI + ECX * 4], EAX	; move first randomNum into someArray 
+ 0000008B  8B 5C 24 0C			MOV		EBX, [ESP+12]			; move arrayCount --> EBX
+ 0000008F  41				INC		ECX
 
-						; fill in array
-						; LOOP counter
-						; compare with length
+					; compare to array length
+ 00000090  3B CB			CMP		ECX, EBX				; if counter < array.length(someArray)
+ 00000092  75 B9			JNE		_loopMe
 
- 00000089			fillArray ENDP
+ 00000094  5D				POP		EBP
+ 00000095  C2 000C			RET		12
+						
+ 00000098			fillArray ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/23/22 23:56:04
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/24/22 14:15:16
 <Arrays, Addressing, and Stack-Passed Parameters     (Proj5_  Symbols 2 - 1
 
 
@@ -353,7 +359,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000585 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000089 Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000098 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -460,8 +466,8 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-fillArray  . . . . . . . . . . .	P Near	 00000048 _TEXT	Length= 00000041 Public STDCALL
-  _loopMe  . . . . . . . . . . .	L Near	 00000050 _TEXT	
+fillArray  . . . . . . . . . . .	P Near	 00000048 _TEXT	Length= 00000050 Public STDCALL
+  _loopMe  . . . . . . . . . . .	L Near	 0000004D _TEXT	
 introduction . . . . . . . . . .	P Near	 0000002B _TEXT	Length= 0000001D Public STDCALL
 main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000002B Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C

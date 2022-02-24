@@ -79,10 +79,10 @@ fillArray PROC
 	PUSH	EBP				; Step 1) Preserve EBP
 	MOV		EBP, ESP		; Step 2) Assign static stack-frame pointer
 
-	; generate random numbers
+	; generate 200 random numbers
 
-;	MOV		ECX, 100
-;_loopMe:
+	XOR		ECX, ECX
+_loopMe:
 
 	MOV		EAX, HI			; upper bound
 	ADD		EAX, 1			; EAX + 1 to include upper range
@@ -108,15 +108,20 @@ fillArray PROC
 	MOV		EAX, EDX		; EAX has randomNum btwn LO & HI
 	CALL	WriteDec
 	CALL	CrLf
-	; store into array
 
-;	LOOP _loopMe
-	
+	; store/fill in array
+	MOV		EDI, [ESP+8]			; reference 1st address of someArray
+	MOV		[EDI + ECX * 4], EAX	; algorithm to store into each index of array 
+	MOV		EBX, [ESP+12]			; move arrayCount --> EBX
+	INC		ECX
 
-		; fill in array
-		; LOOP counter
-		; compare with length
+	; compare to array length
+	CMP		ECX, EBX				; if counter < array.length(someArray)
+	JNE		_loopMe
 
+	POP		EBP
+	RET		12
+		
 fillArray ENDP
 
 END main
