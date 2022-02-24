@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/24/22 14:15:16
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/24/22 14:48:08
 <Arrays, Addressing, and Stack-Passed Parameters     (Proj5_  Page 1 - 1
 
 
@@ -174,14 +174,14 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/24/22 14:15:16
 
  00000000			.code
  00000000			main PROC
- 00000000  E8 00000000 E		CALL	Randomize			; random seed 
+ 00000000  E8 00000000 E		CALL	Randomize				; random seed 
 					
- 00000005  68 00000000 R		PUSH	OFFSET intro1		; push intro1 to stack
- 0000000A  68 0000003A R		PUSH	OFFSET intro2		; push intro2 to stack
+ 00000005  68 00000000 R		PUSH	OFFSET intro1			; push intro1 to stack
+ 0000000A  68 0000003A R		PUSH	OFFSET intro2			; push intro2 to stack
  0000000F  E8 00000017			CALL	introduction
 
  00000014  FF 35 00000581 R		PUSH	arrayCount			
- 0000001A  68 00000261 R		PUSH	OFFSET someArray	; push empty array onto stack
+ 0000001A  68 00000261 R		PUSH	OFFSET someArray		; push empty array onto stack
  0000001F  E8 00000024			CALL	fillArray
 
 					; sortList
@@ -191,72 +191,72 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/24/22 14:15:16
 					; countList 
 
 
-					Invoke ExitProcess,0	; exit to operating system
+					Invoke ExitProcess,0			; exit to operating system
  00000024  6A 00	   *	    push   +000000000h
  00000026  E8 00000000 E   *	    call   ExitProcess
  0000002B			main ENDP
 
  0000002B			introduction PROC
 
- 0000002B  55				PUSH	EBP				; Step 1) Preserve EBP
- 0000002C  8B EC			MOV		EBP, ESP		; Step 2) Assign static stack-frame pointer
+ 0000002B  55				PUSH	EBP						; Step 1) Preserve EBP
+ 0000002C  8B EC			MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
 
- 0000002E  8B 54 24 0C			MOV		EDX, [ESP+12]	; move +12 bytes from ESP to store intro1  [base + offset] 
+ 0000002E  8B 54 24 0C			MOV		EDX, [ESP+12]			; move +12 bytes from ESP to store intro1  [base + offset] 
  00000032  E8 00000000 E		CALL	WriteString
  00000037  33 D2			xor		EDX, EDX
- 00000039  8B 54 24 08			mov		EDX, [ESP+8]	; move +8 bytes from ESP to store intro2	[base + offset]
+ 00000039  8B 54 24 08			mov		EDX, [ESP+8]			; move +8 bytes from ESP to store intro2	[base + offset]
  0000003D  E8 00000000 E		CALL	WriteString
  00000042  33 D2			xor		EDX, EDX
 					
  00000044  5D				pop		EBP
- 00000045  C2 0008			RET		8				; clears pre-call introduction parameters [stack pointer reset]
+ 00000045  C2 0008			RET		8						; clears pre-call introduction parameters [stack pointer reset]
 
  00000048			introduction ENDP
 
  00000048			fillArray PROC
 
- 00000048  55				PUSH	EBP				; Step 1) Preserve EBP
- 00000049  8B EC			MOV		EBP, ESP		; Step 2) Assign static stack-frame pointer
+ 00000048  55				PUSH	EBP						; Step 1) Preserve EBP
+ 00000049  8B EC			MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
 
 					; generate 200 random numbers
 
  0000004B  33 C9			XOR		ECX, ECX
  0000004D			_loopMe:
 
- 0000004D  B8 00000032			MOV		EAX, HI			; upper bound
- 00000052  83 C0 01			ADD		EAX, 1			; EAX + 1 to include upper range
- 00000055  E8 00000000 E		CALL	RandomRange		; takes EAX (upper); outputs new EAX 
+ 0000004D  B8 00000032			MOV		EAX, HI					; upper bound
+ 00000052  83 C0 01			ADD		EAX, 1					; EAX + 1 to include upper range
+ 00000055  E8 00000000 E		CALL	RandomRange				; takes EAX (upper); outputs new EAX 
  0000005A  BB 0000000F			MOV		EBX, LO
- 0000005F  50				PUSH	EAX				; store seed value --> stack
+ 0000005F  50				PUSH	EAX						; store seed value --> stack
  00000060  B8 00000032			MOV		EAX, HI
- 00000065  83 C0 01			ADD		EAX, 1			; to include upper range again
- 00000068  2B C3			SUB		EAX, EBX		; upper - lower --> EAX
+ 00000065  83 C0 01			ADD		EAX, 1					; to include upper range again
+ 00000068  2B C3			SUB		EAX, EBX				; upper - lower --> EAX
 
 						; switch EAX / EBX to prepare for div
  0000006A  8B D8			MOV		EBX, EAX
- 0000006C  58				POP		EAX				; popped off seed --> EAX 
+ 0000006C  58				POP		EAX						; popped off seed --> EAX 
 
 						; EAX (seed) / EBX (upper-lower) at this point
  0000006D  33 D2			XOR		EDX, EDX
- 0000006F  F7 F3			DIV		EBX				; randomNum = seed % (upper-lower) + lower
+ 0000006F  F7 F3			DIV		EBX						; randomNum = seed % (upper-lower) + lower
 
  00000071  BB 0000000F			MOV		EBX, LO
  00000076  03 D3			ADD		EDX, EBX		
 						; at this point, EDX has the randomNum btwn LO & HI
 
- 00000078  8B C2			MOV		EAX, EDX		; EAX has randomNum btwn LO & HI
+ 00000078  8B C2			MOV		EAX, EDX				; EAX has randomNum btwn LO & HI
  0000007A  E8 00000000 E		CALL	WriteDec
  0000007F  E8 00000000 E		CALL	CrLf
 
 					; store/fill in array
  00000084  8B 7C 24 08			MOV		EDI, [ESP+8]			; reference 1st address of someArray
- 00000088  89 04 8F			MOV		[EDI + ECX * 4], EAX	; move first randomNum into someArray 
+ 00000088  89 04 8F			MOV		[EDI + ECX * 4], EAX	; algorithm to store into each index of array 
  0000008B  8B 5C 24 0C			MOV		EBX, [ESP+12]			; move arrayCount --> EBX
  0000008F  41				INC		ECX
 
 					; compare to array length
- 00000090  3B CB			CMP		ECX, EBX				; if counter < array.length(someArray)
- 00000092  75 B9			JNE		_loopMe
+ 00000090  3B CB			CMP		ECX, EBX					
+ 00000092  75 B9			JNE		_loopMe					; if counter < array.length(someArray)
 
  00000094  5D				POP		EBP
  00000095  C2 000C			RET		12
@@ -264,7 +264,7 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/24/22 14:15:16
  00000098			fillArray ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/24/22 14:15:16
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/24/22 14:48:08
 <Arrays, Addressing, and Stack-Passed Parameters     (Proj5_  Symbols 2 - 1
 
 

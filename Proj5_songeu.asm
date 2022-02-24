@@ -37,75 +37,75 @@ HI = 50
 
 .code
 main PROC
-	CALL	Randomize			; random seed 
+	CALL	Randomize				; random seed 
 	
-	PUSH	OFFSET intro1		; push intro1 to stack
-	PUSH	OFFSET intro2		; push intro2 to stack
+	PUSH	OFFSET intro1			; push intro1 to stack
+	PUSH	OFFSET intro2			; push intro2 to stack
 	CALL	introduction
 
 	PUSH	arrayCount			
-	PUSH	OFFSET someArray	; push empty array onto stack
+	PUSH	OFFSET someArray		; push empty array onto stack
 	CALL	fillArray
 
-	; sortList
-	; exchangeElements
-	; displayMedian 
-	; displayList
-	; countList 
+	; CALL	displayList
 
+	; CALL	sortList
+	; CALL	exchangeElements
+	; CALL	displayMedian 
+	; CALL	countList 
 
-	Invoke ExitProcess,0	; exit to operating system
+	Invoke ExitProcess,0			; exit to operating system
 main ENDP
 
 introduction PROC
 
-	PUSH	EBP				; Step 1) Preserve EBP
-	MOV		EBP, ESP		; Step 2) Assign static stack-frame pointer
+	PUSH	EBP						; Step 1) Preserve EBP
+	MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
 
-	MOV		EDX, [ESP+12]	; move +12 bytes from ESP to store intro1  [base + offset] 
+	MOV		EDX, [ESP+12]			; move +12 bytes from ESP to store intro1  [base + offset] 
 	CALL	WriteString
 	xor		EDX, EDX
-	mov		EDX, [ESP+8]	; move +8 bytes from ESP to store intro2	[base + offset]
+	mov		EDX, [ESP+8]			; move +8 bytes from ESP to store intro2	[base + offset]
 	CALL	WriteString
 	xor		EDX, EDX
 	
 	pop		EBP
-	RET		8				; clears pre-call introduction parameters [stack pointer reset]
+	RET		8						; clears pre-call introduction parameters [stack pointer reset]
 
 introduction ENDP
 
 fillArray PROC
 
-	PUSH	EBP				; Step 1) Preserve EBP
-	MOV		EBP, ESP		; Step 2) Assign static stack-frame pointer
+	PUSH	EBP						; Step 1) Preserve EBP
+	MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
 
-	; generate 200 random numbers
+	; generate arraySize-n random numbers
 
 	XOR		ECX, ECX
 _loopMe:
 
-	MOV		EAX, HI			; upper bound
-	ADD		EAX, 1			; EAX + 1 to include upper range
-	CALL	RandomRange		; takes EAX (upper); outputs new EAX 
+	MOV		EAX, HI					; upper bound
+	ADD		EAX, 1					; EAX + 1 to include upper range
+	CALL	RandomRange				; takes EAX (upper); outputs new EAX 
 	MOV		EBX, LO
-	PUSH	EAX				; store seed value --> stack
+	PUSH	EAX						; store seed value --> stack
 	MOV		EAX, HI
-	ADD		EAX, 1			; to include upper range again
-	SUB		EAX, EBX		; upper - lower --> EAX
+	ADD		EAX, 1					; to include upper range again
+	SUB		EAX, EBX				; upper - lower --> EAX
 
 		; switch EAX / EBX to prepare for div
 	MOV		EBX, EAX
-	POP		EAX				; popped off seed --> EAX 
+	POP		EAX						; popped off seed --> EAX 
 
 		; EAX (seed) / EBX (upper-lower) at this point
 	XOR		EDX, EDX
-	DIV		EBX				; randomNum = seed % (upper-lower) + lower
+	DIV		EBX						; randomNum = seed % (upper-lower) + lower
 
 	MOV		EBX, LO
 	ADD		EDX, EBX		
 		; at this point, EDX has the randomNum btwn LO & HI
 
-	MOV		EAX, EDX		; EAX has randomNum btwn LO & HI
+	MOV		EAX, EDX				; EAX has randomNum btwn LO & HI
 	CALL	WriteDec
 	CALL	CrLf
 
@@ -116,12 +116,16 @@ _loopMe:
 	INC		ECX
 
 	; compare to array length
-	CMP		ECX, EBX				; if counter < array.length(someArray)
-	JNE		_loopMe
+	CMP		ECX, EBX					
+	JNE		_loopMe					; if counter < array.length(someArray)
 
 	POP		EBP
 	RET		12
 		
 fillArray ENDP
+
+displayList PROC
+
+displayList	ENDP
 
 END main
