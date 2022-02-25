@@ -17,6 +17,7 @@ LO = 15
 HI = 50 
 
 
+
 .data
 
 	intro1			BYTE	"The Birth of Sorted Random Number Integers! By Eugene",13,10,13,10, 0
@@ -29,8 +30,10 @@ HI = 50
 	sorted_label	BYTE	"Your sorted random numbers:", 13,10, 0 
 	instance_label	BYTE	"Your list of instances of each generated number, starting with the number of 10s:",13,10, 0
 	farewell_msg	BYTE	"Goodbye, and thanks for coming!", 13,10, 0 
+	space			BYTE	" ", 0 
 
 	someArray		DWORD	ARRAYSIZE DUP (?)	
+	countArray		DWORD	123 ; HI - LO + 1
 	arrayCount		DWORD	LENGTHOF someArray	; count = 200
 
 
@@ -39,15 +42,21 @@ HI = 50
 main PROC
 	CALL	Randomize				; random seed 
 	
+	; introduction
 	PUSH	OFFSET intro1			; push intro1 to stack
 	PUSH	OFFSET intro2			; push intro2 to stack
 	CALL	introduction
 
+	; fill array first
 	PUSH	arrayCount			
 	PUSH	OFFSET someArray		; push empty array onto stack
 	CALL	fillArray
 
-	; CALL	displayList
+	; display unsorted random nums 
+	PUSH	OFFSET unsorted_label
+	PUSH	OFFSET someArray
+	PUSH	OFFSET space
+	CALL	displayList
 
 	; CALL	sortList
 	; CALL	exchangeElements
@@ -125,6 +134,52 @@ _loopMe:
 fillArray ENDP
 
 displayList PROC
+
+	; only one procedure to display...
+	;	sorted array
+	;	unsorted array 
+	;	counts array 
+	; therefore, use a universal # of iterations variable from stack
+
+
+	PUSH	EBP						; Step 1) Preserve EBP
+	MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
+
+	; STACK
+	; 
+	; OFFSET_ARRAY
+	; OFFSET_LABEL
+
+
+	MOV		EDX, [ESP+16]			; LABEL OFFSET IS ALWAYS @ BOTTOM MOST OF STACK			
+	CALL	WriteString
+	XOR		ECX, ECX				; cleared ECX to start iteration
+
+	MOV		EDI, [ESP+12]			; reference 1st address of filled someArray into EDI
+_displayLoop:
+	MOV		EAX, [EDI + ECX * 4]	; store each value of array into EAX to print
+	CALL	WriteDec
+	MOV		EDX, [ESP+8]			; create space after each number
+	CALL	WriteString
+
+	XOR		EDX, EDX
+
+	INC		ECX						; increment counter
+	CMP		ECX, ARRAYSIZE
+	JNE		_displayLoop
+
+	POP		EBP
+	RET		12
+	
+
+
+	;	_newLine:						; create new line every 10 #'s 	(from project 4)
+	;	xor		EDX, EDX
+	;	move	EAX, ECX 
+	;	div		divisor_line
+	;	cmp		EDX, 0
+	;	call	CrLf
+	
 
 displayList	ENDP
 
