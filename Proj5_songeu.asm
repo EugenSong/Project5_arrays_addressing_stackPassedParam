@@ -73,12 +73,12 @@ introduction PROC
 
 	MOV		EDX, [ESP+12]			; move +12 bytes from ESP to store intro1  [base + offset] 
 	CALL	WriteString
-	xor		EDX, EDX
-	mov		EDX, [ESP+8]			; move +8 bytes from ESP to store intro2	[base + offset]
+	XOR		EDX, EDX
+	MOV		EDX, [ESP+8]			; move +8 bytes from ESP to store intro2	[base + offset]
 	CALL	WriteString
-	xor		EDX, EDX
+	XOR		EDX, EDX
 	
-	pop		EBP
+	POP		EBP
 	RET		8						; clears pre-call introduction parameters [stack pointer reset]
 
 introduction ENDP
@@ -115,8 +115,9 @@ _loopMe:
 		; at this point, EDX has the randomNum btwn LO & HI
 
 	MOV		EAX, EDX				; EAX has randomNum btwn LO & HI
-	CALL	WriteDec
-	CALL	CrLf
+
+;	CALL	WriteDec		; ignore and remove later (used to check if array filled)
+;	CALL	CrLf
 
 	; store/fill in array
 	MOV		EDI, [ESP+8]			; reference 1st address of someArray
@@ -156,6 +157,8 @@ displayList PROC
 	XOR		ECX, ECX				; cleared ECX to start iteration
 
 	MOV		EDI, [ESP+12]			; reference 1st address of filled someArray into EDI
+
+	; begin iterating through and printing each value of array
 _displayLoop:
 	MOV		EAX, [EDI + ECX * 4]	; store each value of array into EAX to print
 	CALL	WriteDec
@@ -170,13 +173,11 @@ _displayLoop:
 
 	POP		EBP
 	RET		12
-	
-
 
 	;	_newLine:						; create new line every 10 #'s 	(from project 4)
 	;	xor		EDX, EDX
 	;	move	EAX, ECX 
-	;	div		divisor_line
+	;	div		divisor_line			; divisor line = 20
 	;	cmp		EDX, 0
 	;	call	CrLf
 	

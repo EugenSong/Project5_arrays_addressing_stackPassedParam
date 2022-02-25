@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/25/22 13:10:01
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/25/22 13:15:33
 <Arrays, Addressing, and Stack-Passed Parameters     (Proj5_  Page 1 - 1
 
 
@@ -193,7 +193,7 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/25/22 13:10:01
  00000024  68 0000018B R		PUSH	OFFSET unsorted_label
  00000029  68 00000263 R		PUSH	OFFSET someArray
  0000002E  68 00000261 R		PUSH	OFFSET space
- 00000033  E8 00000074			CALL	displayList
+ 00000033  E8 0000006A			CALL	displayList
 
 					; CALL	sortList
 					; CALL	exchangeElements
@@ -212,12 +212,12 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/25/22 13:10:01
 
  00000042  8B 54 24 0C			MOV		EDX, [ESP+12]			; move +12 bytes from ESP to store intro1  [base + offset] 
  00000046  E8 00000000 E		CALL	WriteString
- 0000004B  33 D2			xor		EDX, EDX
- 0000004D  8B 54 24 08			mov		EDX, [ESP+8]			; move +8 bytes from ESP to store intro2	[base + offset]
+ 0000004B  33 D2			XOR		EDX, EDX
+ 0000004D  8B 54 24 08			MOV		EDX, [ESP+8]			; move +8 bytes from ESP to store intro2	[base + offset]
  00000051  E8 00000000 E		CALL	WriteString
- 00000056  33 D2			xor		EDX, EDX
+ 00000056  33 D2			XOR		EDX, EDX
 					
- 00000058  5D				pop		EBP
+ 00000058  5D				POP		EBP
  00000059  C2 0008			RET		8						; clears pre-call introduction parameters [stack pointer reset]
 
  0000005C			introduction ENDP
@@ -254,25 +254,26 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/25/22 13:10:01
 						; at this point, EDX has the randomNum btwn LO & HI
 
  0000008C  8B C2			MOV		EAX, EDX				; EAX has randomNum btwn LO & HI
- 0000008E  E8 00000000 E		CALL	WriteDec
- 00000093  E8 00000000 E		CALL	CrLf
+
+				;	CALL	WriteDec		; ignore and remove later (used to check if array filled)
+				;	CALL	CrLf
 
 					; store/fill in array
- 00000098  8B 7C 24 08			MOV		EDI, [ESP+8]			; reference 1st address of someArray
- 0000009C  89 04 8F			MOV		[EDI + ECX * 4], EAX	; algorithm to store into each index of array 
- 0000009F  8B 5C 24 0C			MOV		EBX, [ESP+12]			; move arrayCount --> EBX
- 000000A3  41				INC		ECX
+ 0000008E  8B 7C 24 08			MOV		EDI, [ESP+8]			; reference 1st address of someArray
+ 00000092  89 04 8F			MOV		[EDI + ECX * 4], EAX	; algorithm to store into each index of array 
+ 00000095  8B 5C 24 0C			MOV		EBX, [ESP+12]			; move arrayCount --> EBX
+ 00000099  41				INC		ECX
 
 					; compare to array length
- 000000A4  3B CB			CMP		ECX, EBX					
- 000000A6  75 B9			JNE		_loopMe					; if counter < array.length(someArray)
+ 0000009A  3B CB			CMP		ECX, EBX					
+ 0000009C  75 C3			JNE		_loopMe					; if counter < array.length(someArray)
 
- 000000A8  5D				POP		EBP
- 000000A9  C2 000C			RET		12
+ 0000009E  5D				POP		EBP
+ 0000009F  C2 000C			RET		12
 						
- 000000AC			fillArray ENDP
+ 000000A2			fillArray ENDP
 
- 000000AC			displayList PROC
+ 000000A2			displayList PROC
 
 					; only one procedure to display...
 					;	sorted array
@@ -281,8 +282,8 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/25/22 13:10:01
 					; therefore, use a universal # of iterations variable from stack
 
 
- 000000AC  55				PUSH	EBP						; Step 1) Preserve EBP
- 000000AD  8B EC			MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
+ 000000A2  55				PUSH	EBP						; Step 1) Preserve EBP
+ 000000A3  8B EC			MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
 
 					; STACK
 					; 
@@ -290,40 +291,40 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/25/22 13:10:01
 					; OFFSET_LABEL
 
 
- 000000AF  8B 54 24 10			MOV		EDX, [ESP+16]			; LABEL OFFSET IS ALWAYS @ BOTTOM MOST OF STACK			
- 000000B3  E8 00000000 E		CALL	WriteString
- 000000B8  33 C9			XOR		ECX, ECX				; cleared ECX to start iteration
+ 000000A5  8B 54 24 10			MOV		EDX, [ESP+16]			; LABEL OFFSET IS ALWAYS @ BOTTOM MOST OF STACK			
+ 000000A9  E8 00000000 E		CALL	WriteString
+ 000000AE  33 C9			XOR		ECX, ECX				; cleared ECX to start iteration
 
- 000000BA  8B 7C 24 0C			MOV		EDI, [ESP+12]			; reference 1st address of filled someArray into EDI
- 000000BE			_displayLoop:
- 000000BE  8B 04 8F			MOV		EAX, [EDI + ECX * 4]	; store each value of array into EAX to print
- 000000C1  E8 00000000 E		CALL	WriteDec
- 000000C6  8B 54 24 08			MOV		EDX, [ESP+8]			; create space after each number
- 000000CA  E8 00000000 E		CALL	WriteString
+ 000000B0  8B 7C 24 0C			MOV		EDI, [ESP+12]			; reference 1st address of filled someArray into EDI
 
- 000000CF  33 D2			XOR		EDX, EDX
+					; begin iterating through and printing each value of array
+ 000000B4			_displayLoop:
+ 000000B4  8B 04 8F			MOV		EAX, [EDI + ECX * 4]	; store each value of array into EAX to print
+ 000000B7  E8 00000000 E		CALL	WriteDec
+ 000000BC  8B 54 24 08			MOV		EDX, [ESP+8]			; create space after each number
+ 000000C0  E8 00000000 E		CALL	WriteString
 
- 000000D1  41				INC		ECX						; increment counter
- 000000D2  81 F9 000000C8		CMP		ECX, ARRAYSIZE
- 000000D8  75 E4			JNE		_displayLoop
+ 000000C5  33 D2			XOR		EDX, EDX
 
- 000000DA  5D				POP		EBP
- 000000DB  C2 000C			RET		12
-					
+ 000000C7  41				INC		ECX						; increment counter
+ 000000C8  81 F9 000000C8		CMP		ECX, ARRAYSIZE
+ 000000CE  75 E4			JNE		_displayLoop
 
+ 000000D0  5D				POP		EBP
+ 000000D1  C2 000C			RET		12
 
 					;	_newLine:						; create new line every 10 #'s 	(from project 4)
 					;	xor		EDX, EDX
 					;	move	EAX, ECX 
-					;	div		divisor_line
+					;	div		divisor_line			; divisor line = 20
 					;	cmp		EDX, 0
 					;	call	CrLf
 					
 
- 000000DE			displayList	ENDP
+ 000000D4			displayList	ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/25/22 13:10:01
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/25/22 13:15:33
 <Arrays, Addressing, and Stack-Passed Parameters     (Proj5_  Symbols 2 - 1
 
 
@@ -418,7 +419,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 0000058B Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000000DE Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000D4 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -525,9 +526,9 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-displayList  . . . . . . . . . .	P Near	 000000AC _TEXT	Length= 00000032 Public STDCALL
-  _displayLoop . . . . . . . . .	L Near	 000000BE _TEXT	
-fillArray  . . . . . . . . . . .	P Near	 0000005C _TEXT	Length= 00000050 Public STDCALL
+displayList  . . . . . . . . . .	P Near	 000000A2 _TEXT	Length= 00000032 Public STDCALL
+  _displayLoop . . . . . . . . .	L Near	 000000B4 _TEXT	
+fillArray  . . . . . . . . . . .	P Near	 0000005C _TEXT	Length= 00000046 Public STDCALL
   _loopMe  . . . . . . . . . . .	L Near	 00000061 _TEXT	
 introduction . . . . . . . . . .	P Near	 0000003F _TEXT	Length= 0000001D Public STDCALL
 main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000003F Public STDCALL
