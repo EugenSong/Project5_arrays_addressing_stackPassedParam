@@ -35,6 +35,7 @@ HI = 50
 	someArray		DWORD	ARRAYSIZE DUP (?)	
 	countArray		DWORD	123 ; HI - LO + 1
 	arrayCount		DWORD	LENGTHOF someArray	; count = 200
+	numPerLine		DWORD	20
 
 
 
@@ -56,11 +57,23 @@ main PROC
 	PUSH	OFFSET unsorted_label
 	PUSH	OFFSET someArray
 	PUSH	OFFSET space
+	PUSH	numPerLine
 	CALL	displayList
-
+	
 	; CALL	sortList
+	; sort list before outputting the median value
 	; CALL	exchangeElements
+
+	;	display the median value of someArray
+	;PUSH	OFFSET median_label
+	;PUSH	OFFSET someArray
 	; CALL	displayMedian 
+
+	;PUSH	OFFSET sorted_label
+	;PUSH	OFFSET someArray
+	;PUSH	OFFSET space
+	; CALL displaySortedArray
+	
 	; CALL	countList 
 
 	Invoke ExitProcess,0			; exit to operating system
@@ -136,51 +149,57 @@ fillArray ENDP
 
 displayList PROC
 
-	; only one procedure to display...
-	;	sorted array
-	;	unsorted array 
-	;	counts array 
-	; therefore, use a universal # of iterations variable from stack
+; ONLY ONE DISPLAYLIST PROC for 3 different arrays to print; therefore universally PUSH labels / values the 
 
 
 	PUSH	EBP						; Step 1) Preserve EBP
 	MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
 
 	; STACK
-	; 
-	; OFFSET_ARRAY
-	; OFFSET_LABEL
+	; --------------------------
+	; POP EBP
+	; RET ADDRESS
+	; NUM PER LINE
+	; OFFSET SPACE (" ")
+	; OFFSET ARRAY
+	; OFFSET LABEL
 
-
-	MOV		EDX, [ESP+16]			; LABEL OFFSET IS ALWAYS @ BOTTOM MOST OF STACK			
+	MOV		EDX, [ESP+20]			; LABEL OFFSET IS ALWAYS @ BOTTOM MOST OF STACK			
 	CALL	WriteString
 	XOR		ECX, ECX				; cleared ECX to start iteration
 
-	MOV		EDI, [ESP+12]			; reference 1st address of filled someArray into EDI
+	MOV		EDI, [ESP+16]			; reference 1st address of filled someArray into EDI
 
 	; begin iterating through and printing each value of array
 _displayLoop:
 	MOV		EAX, [EDI + ECX * 4]	; store each value of array into EAX to print
 	CALL	WriteDec
-	MOV		EDX, [ESP+8]			; create space after each number
+	MOV		EDX, [ESP+12]			; create space after each number
 	CALL	WriteString
 
-	XOR		EDX, EDX
+	XOR		EDX, EDX				; clear EDX to use in DIV
 
-	INC		ECX						; increment counter
+	INC		ECX						; increment counter each time num is displayed
+
+	; insert new lines here 
+
+	MOV		EBX, [ESP+8]			; store numPerLine into EBX to use as divisor
+									; compare numPerLine after printing first num
+	MOV		EAX, ECX 
+	DIV		EBX
+	CMP		EDX, 0
+
+	JNE		_keepPrinting			; if remainder != 0 (IE...20 does not divide index of printed num) 
+	CALL	CrLf
+
+_keepPrinting:
+	; check whether # displayed is == length array
 	CMP		ECX, ARRAYSIZE
 	JNE		_displayLoop
 
 	POP		EBP
-	RET		12
-
-	;	_newLine:						; create new line every 10 #'s 	(from project 4)
-	;	xor		EDX, EDX
-	;	move	EAX, ECX 
-	;	div		divisor_line			; divisor line = 20
-	;	cmp		EDX, 0
-	;	call	CrLf
-	
+	CALL	CrLf
+	RET		16
 
 displayList	ENDP
 
