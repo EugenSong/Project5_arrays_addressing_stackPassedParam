@@ -60,19 +60,23 @@ main PROC
 	PUSH	numPerLine
 	CALL	displayList
 	
-	; CALL	sortList
 	; sort list before outputting the median value
+	PUSH	OFFSET someArray
+	PUSH	arrayCount
+	CALL	sortList
+	
 	; CALL	exchangeElements
 
-	;	display the median value of someArray
+	; display the median value of someArray
 	;PUSH	OFFSET median_label
 	;PUSH	OFFSET someArray
-	; CALL	displayMedian 
+	;CALL	displayMedian 
 
-	;PUSH	OFFSET sorted_label
-	;PUSH	OFFSET someArray
-	;PUSH	OFFSET space
-	; CALL displaySortedArray
+	PUSH	OFFSET sorted_label
+	PUSH	OFFSET someArray
+	PUSH	OFFSET space
+	PUSH	numPerLine
+	CALL	displayList
 	
 	; CALL	countList 
 
@@ -202,5 +206,52 @@ _keepPrinting:
 	RET		16
 
 displayList	ENDP
+
+sortList PROC
+
+	; BUBBLE SORT (n^2) 
+	; NESTED LOOP
+
+	PUSH	EBP						; Step 1) Preserve EBP
+	MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
+
+	MOV		ECX, [ESP+8]			; store outer loop counter for bubble sort  
+	
+_outerLoop: ; do nothing except iterate through each index once 
+	
+	MOV		ESI, [ESP+12]			; syntax: MOV ESI, source_address (reference of first value) 
+	MOV		EDX, ECX				; stores ECX value into EDX 
+
+	MOV		ECX, [ESP+8]			; reset ECX's value to 200 after each outer iteration
+
+_innerLoop:	
+
+	; address of index 0 of filled array
+	MOV		EAX, [ESI]				; store first value into EAX to compare
+	MOV		EBX, [ESI+4]			; store second value into EBX to compare
+
+	CMP		EAX, EBX
+	JLE		_goBackUp
+
+	; swapping			if EBX (next value) > EAX (current value)
+	MOV		[ESI], EBX
+	MOV		[ESI+4], EAX
+	
+_goBackUp:
+
+	ADD		ESI, 4					; increment by 4 memory addresses once nums have been checked
+	CMP		ECX, 1h				; only want to iterate through innerLoop 199 times so I don't go out of array range
+	JE		_exitInner
+	LOOP	_innerLoop				
+
+_exitInner:
+
+	MOV		ECX, EDX
+	LOOP	_outerLoop
+
+	POP		EBP
+	RET		8
+
+sortList ENDP
 
 END main
