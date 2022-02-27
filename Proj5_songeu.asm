@@ -83,11 +83,18 @@ main PROC
 	CALL	countList 
 
 	; display the new array of counts
-;	PUSH	OFFSET instance_label
-;	PUSH	OFFSET countArray
-;	PUSH	OFFSET space
-;	PUSH	numPerLine
-;	CALL	displayList
+	;PUSH	OFFSET instance_label
+	;PUSH	OFFSET countArray
+	;PUSH	OFFSET space
+	;PUSH	numPerLine
+	;CALL	displayList
+
+	; display good bye msg
+	;PUSH	OFFSET farewell_msg
+	;CALL	goodBye
+	
+
+
 
 	Invoke ExitProcess,0			; exit to operating system
 main ENDP
@@ -358,10 +365,51 @@ countList PROC
 	PUSH	EBP
 	MOV		EBP, ESP
 
+	MOV		
+_top:
+
+
+_middle:
+
+
+_finish:
+
 
 	POP		EBP
 	RET		8
 
 countList ENDP
+
+
+
+
+
+
+
+goodBye PROC
+
+	PUSH	EBP
+	MOV		EBP, ESP
+
+	XOR		EDX, EDX
+	MOV		EDX, [ESP+8]
+	CALL	WriteString
+	CALL	CrLf
+	CALL	CrLf
+
+	POP		EBP
+	RET		4
+
+goodBye ENDP
+
+
+
+
+
+
+
+
+
+
 
 END main
