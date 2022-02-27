@@ -33,9 +33,9 @@ HI = 50
 	space			BYTE	" ", 0 
 
 	someArray		DWORD	ARRAYSIZE DUP (?)	
-	countArray		DWORD	123 ; HI - LO + 1
-	arrayCount		DWORD	LENGTHOF someArray	; count = 200
+	arrayCount		DWORD	LENGTHOF someArray	
 	numPerLine		DWORD	20
+	countArray		DWORD	?
 
 
 
@@ -77,7 +77,17 @@ main PROC
 	PUSH	numPerLine
 	CALL	displayList
 	
-	; CALL	countList 
+	; generate new array of counts
+	PUSH	OFFSET someArray
+	PUSH	OFFSET countArray
+	CALL	countList 
+
+	; display the new array of counts
+;	PUSH	OFFSET instance_label
+;	PUSH	OFFSET countArray
+;	PUSH	OFFSET space
+;	PUSH	numPerLine
+;	CALL	displayList
 
 	Invoke ExitProcess,0			; exit to operating system
 main ENDP
@@ -342,5 +352,16 @@ _finish:
 	RET		8
 
 displayMedian ENDP
+
+countList PROC
+	
+	PUSH	EBP
+	MOV		EBP, ESP
+
+
+	POP		EBP
+	RET		8
+
+countList ENDP
 
 END main
