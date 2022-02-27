@@ -28,14 +28,15 @@ HI = 50
 	unsorted_label	BYTE	"Your unsorted random numbers:",13,10, 0
 	median_label	BYTE	"The median value of the array: ",0 
 	sorted_label	BYTE	"Your sorted random numbers:", 13,10, 0 
-	instance_label	BYTE	"Your list of instances of each generated number, starting with the number of 10s:",13,10, 0
+	instance_label	BYTE	"Your list of instances of each generated number, starting with the number of 15s:",13,10, 0
 	farewell_msg	BYTE	"Goodbye, and thanks for coming!", 13,10, 0 
 	space			BYTE	" ", 0 
 
 	someArray		DWORD	ARRAYSIZE DUP (?)	
-	countArray		DWORD	123 ; HI - LO + 1
-	arrayCount		DWORD	LENGTHOF someArray	; count = 200
+	countArray		DWORD	?					
+	arrayCount		DWORD	LENGTHOF someArray	
 	numPerLine		DWORD	20
+
 
 
 
@@ -77,8 +78,23 @@ main PROC
 	PUSH	numPerLine
 	CALL	displayList
 	
-	; CALL	countList 
+	; generate a new array with the number of instances of each value in someArray
+	PUSH	OFFSET someArray
+	PUSH	OFFSET countArray
+	CALL	countList	
 
+	; display number of instances each value appears in sorted array
+	;PUSH	OFFSET instance_label
+	;PUSH	OFFSET countArray
+	;PUSH	OFFSET space
+	;PUSH	numPerLine
+	;CALL	displayList
+
+
+	; display goodbye message
+	;PUSH	OFFSET farewell_msg
+	;CALL	goodBye
+	
 	Invoke ExitProcess,0			; exit to operating system
 main ENDP
 
@@ -128,12 +144,10 @@ _loopMe:
 
 	MOV		EBX, LO
 	ADD		EDX, EBX		
+
 		; at this point, EDX has the randomNum btwn LO & HI
 
 	MOV		EAX, EDX				; EAX has randomNum btwn LO & HI
-
-;	CALL	WriteDec		; ignore and remove later (used to check if array filled)
-;	CALL	CrLf
 
 	; store/fill in array
 	MOV		EDI, [ESP+8]			; reference 1st address of someArray
@@ -232,6 +246,7 @@ _innerLoop:
 	CMP		EAX, EBX
 	JLE		_goBackUp
 
+	
 	PUSH	ESI						; push element one reference
 	ADD		ESI,4
 	PUSH	ESI						; push element two reference
@@ -342,5 +357,27 @@ _finish:
 	RET		8
 
 displayMedian ENDP
+
+
+countList PROC
+	PUSH	EBP
+	MOV		EBP, ESP
+
+	MOV		ECX, 1						; initialize counter 	
+	MOV		EDI, [ESP+12]				; referenced someArray[0] address
+
+_start: 
+	; LOOP THRU someArray
+	MOV		EAX, [EDI+ECX*4]
+	MOV		EBX, [EDI+ECX*4+4] 
+
+_middle:
+
+_end:
+
+	POP		EBP
+	RET		8
+
+countList ENDP
 
 END main
