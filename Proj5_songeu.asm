@@ -28,7 +28,7 @@ HI = 50
 	unsorted_label	BYTE	"Your unsorted random numbers:",13,10, 0
 	median_label	BYTE	"The median value of the array: ",0 
 	sorted_label	BYTE	"Your sorted random numbers:", 13,10, 0 
-	instance_label	BYTE	"Your list of instances of each generated number, starting with the number of 10s:",13,10, 0
+	instance_label	BYTE	"Your list of instances of each generated number, starting with the number of 15s:",13,10, 0
 	farewell_msg	BYTE	"Goodbye, and thanks for coming!", 13,10, 0 
 	space			BYTE	" ", 0 
 
@@ -36,6 +36,7 @@ HI = 50
 	arrayCount		DWORD	LENGTHOF someArray	
 	numPerLine		DWORD	20
 	countArray		DWORD	?
+
 
 
 
@@ -145,12 +146,10 @@ _loopMe:
 
 	MOV		EBX, LO
 	ADD		EDX, EBX		
+
 		; at this point, EDX has the randomNum btwn LO & HI
 
 	MOV		EAX, EDX				; EAX has randomNum btwn LO & HI
-
-;	CALL	WriteDec		; ignore and remove later (used to check if array filled)
-;	CALL	CrLf
 
 	; store/fill in array
 	MOV		EDI, [ESP+8]			; reference 1st address of someArray
@@ -249,6 +248,7 @@ _innerLoop:
 	CMP		EAX, EBX
 	JLE		_goBackUp
 
+	
 	PUSH	ESI						; push element one reference
 	ADD		ESI,4
 	PUSH	ESI						; push element two reference
