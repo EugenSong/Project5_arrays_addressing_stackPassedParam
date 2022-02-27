@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/26/22 13:12:52
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/26/22 16:21:45
 <Arrays, Addressing, and Stack-Passed Parameters     (Proj5_  Page 1 - 1
 
 
@@ -197,13 +197,14 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/26/22 13:12:52
  00000033  FF 35 0000058B R		PUSH	numPerLine
  00000039  E8 00000094			CALL	displayList
 					
+					; sort list before outputting the median value
  0000003E  68 00000263 R		PUSH	OFFSET someArray
  00000043  FF 35 00000587 R		PUSH	arrayCount
  00000049  E8 000000CD			CALL	sortList
-					; sort list before outputting the median value
+					
 					; CALL	exchangeElements
 
-					;	display the median value of someArray
+					; display the median value of someArray
 					;PUSH	OFFSET median_label
 					;PUSH	OFFSET someArray
 					;CALL	displayMedian 
@@ -369,31 +370,64 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/26/22 13:12:52
  0000012E  8B 5E 04			MOV		EBX, [ESI+4]			; store second value into EBX to compare
 
  00000131  3B C3			CMP		EAX, EBX
- 00000133  7E 05			JLE		_goBackUp
+ 00000133  7E 12			JLE		_goBackUp
 
-					; swapping			if EBX (next value) > EAX (current value)
- 00000135  89 1E			MOV		[ESI], EBX
- 00000137  89 46 04			MOV		[ESI+4], EAX
+ 00000135  56				PUSH	ESI						; push element one reference
+ 00000136  83 C6 04			ADD		ESI,4
+ 00000139  56				PUSH	ESI						; push element two reference
+ 0000013A  83 EE 04			SUB		ESI, 4					; reset value of ESI for inner loop
 					
- 0000013A			_goBackUp:
+ 0000013D  89 1E			MOV		[ESI], EBX
+ 0000013F  89 46 04			MOV		[ESI+4], EAX
 
- 0000013A  83 C6 04			ADD		ESI, 4					; increment by 4 memory addresses once nums have been checked
- 0000013D  83 F9 01			CMP		ECX, 1h				; only want to iterate through innerLoop 199 times so I don't go out of array range
- 00000140  74 02			JE		_exitInner
- 00000142  E2 E8			LOOP	_innerLoop				
+					; swap elements
+ 00000142  E8 00000012			CALL	exchangeElements
+					
+ 00000147			_goBackUp:
 
- 00000144			_exitInner:
+ 00000147  83 C6 04			ADD		ESI, 4					; increment by 4 memory addresses once nums have been checked
+ 0000014A  83 F9 01			CMP		ECX, 1h				; only want to iterate through innerLoop 199 times so I don't go out of array range
+ 0000014D  74 02			JE		_exitInner
+ 0000014F  E2 DB			LOOP	_innerLoop				
 
- 00000144  8B CA			MOV		ECX, EDX
- 00000146  E2 DA			LOOP	_outerLoop
+ 00000151			_exitInner:
 
- 00000148  5D				POP		EBP
- 00000149  C2 0008			RET		8
+ 00000151  8B CA			MOV		ECX, EDX
+ 00000153  E2 CD			LOOP	_outerLoop
 
- 0000014C			sortList ENDP
+ 00000155  5D				POP		EBP
+ 00000156  C2 0008			RET		8
+
+ 00000159			sortList ENDP
+
+ 00000159			exchangeElements PROC
+
+ 00000159  55				PUSH	EBP							; standard ebp push
+ 0000015A  8B EC			MOV		EBP, ESP					; standard static base pointer
+ 0000015C  8B 44 24 0C			MOV		EAX, [ESP+12]				; grab ESI location 
+ 00000160  8B 5C 24 08			MOV		EBX, [ESP+8]				; grab ESI + 4 location 
+
+				; turn EAX / EBX into their stack location's values 
+ 00000164  50				PUSH	EAX
+ 00000165  8B 03			MOV		EAX, [EBX]
+ 00000167  5B				POP		EBX
+ 00000168  50				PUSH	EAX
+ 00000169  8B 03			MOV		EAX, [EBX]
+ 0000016B  5B				POP		EBX
+
+				; exchange the two values 
+ 0000016C  93				XCHG	EBX, EAX
+
+				; store back into respective array slots
+ 0000016D  89 46 04			MOV		[ESI+4], EAX
+ 00000170  89 1E			MOV		[ESI], EBX
+
+ 00000172  5D				POP		EBP
+ 00000173  C2 0008			RET		8
+ 00000176			exchangeElements ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/26/22 13:12:52
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/26/22 16:21:45
 <Arrays, Addressing, and Stack-Passed Parameters     (Proj5_  Symbols 2 - 1
 
 
@@ -488,7 +522,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 0000058F Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000014C Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000176 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -598,17 +632,18 @@ WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 displayList  . . . . . . . . . .	P Near	 000000D2 _TEXT	Length= 00000049 Public STDCALL
   _displayLoop . . . . . . . . .	L Near	 000000E4 _TEXT	
   _keepPrinting  . . . . . . . .	L Near	 0000010A _TEXT	
+exchangeElements . . . . . . . .	P Near	 00000159 _TEXT	Length= 0000001D Public STDCALL
 fillArray  . . . . . . . . . . .	P Near	 0000008C _TEXT	Length= 00000046 Public STDCALL
   _loopMe  . . . . . . . . . . .	L Near	 00000091 _TEXT	
 introduction . . . . . . . . . .	P Near	 0000006F _TEXT	Length= 0000001D Public STDCALL
 main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000006F Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
-sortList . . . . . . . . . . . .	P Near	 0000011B _TEXT	Length= 00000031 Public STDCALL
+sortList . . . . . . . . . . . .	P Near	 0000011B _TEXT	Length= 0000003E Public STDCALL
   _outerLoop . . . . . . . . . .	L Near	 00000122 _TEXT	
   _innerLoop . . . . . . . . . .	L Near	 0000012C _TEXT	
-  _goBackUp  . . . . . . . . . .	L Near	 0000013A _TEXT	
-  _exitInner . . . . . . . . . .	L Near	 00000144 _TEXT	
+  _goBackUp  . . . . . . . . . .	L Near	 00000147 _TEXT	
+  _exitInner . . . . . . . . . .	L Near	 00000151 _TEXT	
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 
 

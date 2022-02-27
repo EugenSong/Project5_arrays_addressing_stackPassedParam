@@ -64,14 +64,13 @@ main PROC
 	PUSH	OFFSET someArray
 	PUSH	arrayCount
 	CALL	sortList
-	
-	; CALL	exchangeElements
 
-	; display the median value of someArray
-	;PUSH	OFFSET median_label
-	;PUSH	OFFSET someArray
-	;CALL	displayMedian 
+	; display the median value of sorted random nums
+	PUSH	OFFSET median_label
+	PUSH	OFFSET someArray
+	CALL	displayMedian 
 
+	; display sorted random nums
 	PUSH	OFFSET sorted_label
 	PUSH	OFFSET someArray
 	PUSH	OFFSET space
@@ -233,9 +232,16 @@ _innerLoop:
 	CMP		EAX, EBX
 	JLE		_goBackUp
 
-	; swapping			if EBX (next value) > EAX (current value)
+	PUSH	ESI						; push element one reference
+	ADD		ESI,4
+	PUSH	ESI						; push element two reference
+	SUB		ESI, 4					; reset value of ESI for inner loop
+	
 	MOV		[ESI], EBX
 	MOV		[ESI+4], EAX
+
+	; swap elements
+	CALL	exchangeElements
 	
 _goBackUp:
 
@@ -253,5 +259,46 @@ _exitInner:
 	RET		8
 
 sortList ENDP
+
+exchangeElements PROC
+
+	PUSH	EBP							; standard ebp push
+	MOV		EBP, ESP					; standard static base pointer
+	MOV		EAX, [ESP+12]				; grab ESI location 
+	MOV		EBX, [ESP+8]				; grab ESI + 4 location 
+
+; turn EAX / EBX into their stack location's values 
+	PUSH	EAX
+	MOV		EAX, [EBX]
+	POP		EBX
+	PUSH	EAX
+	MOV		EAX, [EBX]
+	POP		EBX
+
+; exchange the two values 
+	XCHG	EBX, EAX
+
+; store back into respective array slots
+	MOV		[ESI+4], EAX
+	MOV		[ESI], EBX
+
+	POP		EBP
+	RET		8
+exchangeElements ENDP
+
+displayMedian PROC
+
+	PUSH	EBP						; Step 1) Preserve EBP
+	MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
+
+	MOV		EDX, [EBP+12]			
+	CALL	WriteString
+
+	; if even # of values
+	; if odd # of values
+
+
+
+displayMedian ENDP
 
 END main
