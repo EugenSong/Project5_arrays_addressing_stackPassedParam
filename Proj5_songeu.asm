@@ -26,7 +26,7 @@ HI = 50
 					BYTE	"and output the list in ascending order and finally show the number of instances of each ",13,10 
 					BYTE	"generated value, starting with the number of 10s.",13,10,13,10,0
 	unsorted_label	BYTE	"Your unsorted random numbers:",13,10, 0
-	median_label	BYTE	"The median value of the array: ", 13,10,0 
+	median_label	BYTE	"The median value of the array: ",0 
 	sorted_label	BYTE	"Your sorted random numbers:", 13,10, 0 
 	instance_label	BYTE	"Your list of instances of each generated number, starting with the number of 10s:",13,10, 0
 	farewell_msg	BYTE	"Goodbye, and thanks for coming!", 13,10, 0 
@@ -294,10 +294,52 @@ displayMedian PROC
 	MOV		EDX, [EBP+12]			
 	CALL	WriteString
 
-	; if even # of values
-	; if odd # of values
+	; check length of array size
+	XOR		EDX, EDX				; clear EDX to use for div
+	MOV		EAX, ARRAYSIZE	
+	MOV		EBX, 2
+	DIV		EBX						 
 
+	CMP		EDX, 0
+	JE		_evenNum
 
+	; do odd
+	XOR		EDX, EDX
+	MOV		EDI, [ESP+8]			; reference 1st address of filled someArray into EDI
+	DEC		EAX
+	MOV		EAX, [EDI + EAX * 4]	; move [4 x index number] places in the array (middle value since odd)
+	CALL	WriteDec							
+	JMP		_finish
+
+_evenNum:
+	; do even
+	XOR		EDX, EDX
+	MOV		EDI, [ESP+8]			; reference 1st address of filled someArray into EDI
+	PUSH	EAX
+	DEC		EAX
+	MOV		EAX, [EDI + EAX * 4]	;  store (arrayCount / 2)-nth index value 
+	POP		EBX
+	MOV		EBX, [EDI + EBX * 4]	; store (arrayCount / 2 + 1)- nth index value
+
+	ADD		EAX, EBX 
+	MOV		EBX, 2
+	DIV		EBX
+
+	CMP		EDX, 0
+	JE		_noAdd
+	INC		EAX						; half- round up here 
+	CALL	WriteDec
+	JMP		_finish
+
+_noAdd:
+	CALL	WriteDec
+
+_finish:
+
+	CALL	CrLf
+	CALL	CrLf
+	POP		EBP
+	RET		8
 
 displayMedian ENDP
 
