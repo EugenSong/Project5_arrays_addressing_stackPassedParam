@@ -192,11 +192,11 @@ fillArray PROC
 	XOR		ECX, ECX
 
 _loopMe:
-	MOV		EAX, HI					; upper bound
-	ADD		EAX, 1					; EAX + 1 to include upper range
+	MOV		EAX, HI						; upper bound
+	ADD		EAX, 1						; EAX + 1 to include upper range
 	CALL	RandomRange				
-	MOV		EBX, LO					; lower bound
-	PUSH	EAX						; store seed value --> stack
+	MOV		EBX, LO						; lower bound
+	PUSH	EAX							; store seed value --> stack
 	MOV		EAX, HI
 	ADD		EAX, 1					
 	SUB		EAX, EBX				
@@ -245,14 +245,14 @@ fillArray ENDP
 ; Postconditions: EAX changed
 ;
 ; Receives:
-;		[ESP+24]		= address of label for array				 STACK 
-;		[ESP+20]		= address of passed array					 ------- ESP ------------
-;		[ESP+16]		= address of space							 POP EBP	
-;		[ESP+12]		= address of numbers per line				 SIZE OF ARRAY
-;		[ESP+8]			= address of size of array					 NUM PER LINE
-;																	 OFFSET SPACE (" ")
-;																	 OFFSET ARRAY
-;																	 OFFSET LABEL
+;		[ESP+24]		= address of label for array				STACK 
+;		[ESP+20]		= address of passed array					------- ESP ------------
+;		[ESP+16]		= address of space							POP EBP	
+;		[ESP+12]		= address of numbers per line				SIZE OF ARRAY
+;		[ESP+8]			= address of size of array					NUM PER LINE
+;																	OFFSET SPACE (" ")
+;																	OFFSET ARRAY
+;																	OFFSET LABEL
 ; Returns: n/a
 ;
 ; ---------------------------------------------------------------------------------
@@ -451,21 +451,21 @@ displayMedian PROC
 
 	; do odd
 	XOR		EDX, EDX
-	MOV		EDI, [ESP+8]			; reference ADDRESS of filled randArray into EDI
+	MOV		EDI, [ESP+8]					; reference ADDRESS of filled randArray into EDI
 	DEC		EAX
-	MOV		EAX, [EDI + EAX * 4]	; move [4*index number] places in the array (middle value since odd)
+	MOV		EAX, [EDI + EAX * 4]			; move [4*index number] places in the array (middle value since odd)
 	CALL	WriteDec							
 	JMP		_finish
 
-_evenNum:
 	; do even
+_evenNum:
 	XOR		EDX, EDX
 	MOV		EDI, [ESP+8]			
 	PUSH	EAX
 	DEC		EAX
-	MOV		EAX, [EDI + EAX * 4]	;  store (arrayCount / 2)-nth index value 
+	MOV		EAX, [EDI + EAX * 4]			;  store (arrayCount / 2)-nth index value 
 	POP		EBX
-	MOV		EBX, [EDI + EBX * 4]	; store (arrayCount / 2 + 1)- nth index value
+	MOV		EBX, [EDI + EBX * 4]			; store (arrayCount / 2 + 1)- nth index value
 
 	ADD		EAX, EBX 
 	MOV		EBX, 2
@@ -473,7 +473,7 @@ _evenNum:
 
 	CMP		EDX, 0
 	JE		_noAdd
-	INC		EAX						; account for half-round up here 
+	INC		EAX							; account for half-round up here 
 	CALL	WriteDec
 	JMP		_finish
 
