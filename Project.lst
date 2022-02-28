@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 18:53:32
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 19:47:46
 <Arrays, Addressing, and Stack-Passed Parameters     (Proj5_  Page 1 - 1
 
 
@@ -274,6 +274,21 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 18:53:32
  000000C3  E8 00000000 E   *	    call   ExitProcess
  000000C8			main ENDP
 
+				; ---------------------------------------------------------------------------------
+				; Name: introduction
+				;
+				; Introduces program title, program author and program description.
+				;
+				; Preconditions: the strings must be type BYTE
+				;
+				; Postconditions: EDX changed.
+				;
+				; Receives:
+				;		[esp+12]	= address of intro1
+				;		[esp+8]		= address of intro2 
+				;
+				; Returns: n/a
+				; ---------------------------------------------------------------------------------
  000000C8			introduction PROC
 
  000000C8  55				PUSH	EBP						; Step 1) Preserve EBP
@@ -287,10 +302,30 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 18:53:32
  000000DF  33 D2			XOR		EDX, EDX
 					
  000000E1  5D				POP		EBP						; POP EBP before RET
- 000000E2  C2 0008			RET		8						; clears pre-call introduction parameters [stack pointer reset]
+ 000000E2  C2 0008			RET		8						; clears pre-call introduction parameters including RET[stack pointer reset]
 
  000000E5			introduction ENDP
 
+				; ---------------------------------------------------------------------------------
+				; Name: fillArray
+				;
+				; Stores random numbers into empty array.
+				;
+				; Preconditions: 
+				;		the array must be type DWORD
+				;		CALL Randomize 
+				;
+				; Postconditions: n/a
+				;
+				; Receives:
+				;		[esp+8]		= address of randArray
+				;		[esp+12]	= length of randArray (arrayCount)
+				;		HI, LO are global variables
+				;
+				; Returns: 
+				;		array filled with random numbers in no particular order
+				;		[EDI+ECX*4]
+				; ---------------------------------------------------------------------------------
  000000E5			fillArray PROC
 
  000000E5  55				PUSH	EBP						
@@ -298,11 +333,11 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 18:53:32
  000000E8  33 C9			XOR		ECX, ECX
 
  000000EA			_loopMe:
- 000000EA  B8 00000032			MOV		EAX, HI					; upper bound
- 000000EF  83 C0 01			ADD		EAX, 1					; EAX + 1 to include upper range
+ 000000EA  B8 00000032			MOV		EAX, HI						; upper bound
+ 000000EF  83 C0 01			ADD		EAX, 1						; EAX + 1 to include upper range
  000000F2  E8 00000000 E		CALL	RandomRange				
- 000000F7  BB 0000000F			MOV		EBX, LO					; lower bound
- 000000FC  50				PUSH	EAX						; store seed value --> stack
+ 000000F7  BB 0000000F			MOV		EBX, LO						; lower bound
+ 000000FC  50				PUSH	EAX							; store seed value --> stack
  000000FD  B8 00000032			MOV		EAX, HI
  00000102  83 C0 01			ADD		EAX, 1					
  00000105  2B C3			SUB		EAX, EBX				
@@ -323,7 +358,6 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 18:53:32
  00000113  03 D3			ADD		EDX, EBX		
 
 					; ------------ at this point, EDX has the randomNum btwn LO & HI -------------
-					
  00000115  8B C2			MOV		EAX, EDX
 
 					; store/fill in array
@@ -341,21 +375,37 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 18:53:32
 						
  0000012B			fillArray ENDP
 
+				; ---------------------------------------------------------------------------------
+				; Name: displayList
+				;
+				; Displays the contents of an array from smallest index to largest index.
+				;
+				; Preconditions: 
+				;		the array must be type DWORD 
+				;
+				; Postconditions: EAX changed
+				;
+				; Receives:
+				;		[ESP+24]		= address of label for array				STACK 
+				;		[ESP+20]		= address of passed array					------- ESP ------------
+				;		[ESP+16]		= address of space							POP EBP	
+				;		[ESP+12]		= address of numbers per line				SIZE OF ARRAY
+				;		[ESP+8]			= address of size of array					NUM PER LINE
+				;																	OFFSET SPACE (" ")
+				;																	OFFSET ARRAY
+				;																	OFFSET LABEL
+				; Returns: n/a
+				;
+				; ---------------------------------------------------------------------------------
  0000012B			displayList PROC 
 
- 0000012B  55				PUSH	EBP									; STACK
- 0000012C  8B EC			MOV		EBP, ESP							; ------- ESP ------------	
-																; POP EBP	
-																; RET ADDRESS
-																; SIZE OF ARRAY
-																; NUM PER LINE
-																; OFFSET SPACE (" ")
-																; OFFSET ARRAY
-																; OFFSET LABEL
+ 0000012B  55				PUSH	EBP					
+ 0000012C  8B EC			MOV		EBP, ESP								
+												
  0000012E  8B 54 24 18			MOV		EDX, [ESP+24]		
  00000132  E8 00000000 E		CALL	WriteString
  00000137  33 C9			XOR		ECX, ECX
- 00000139  8B 7C 24 14			MOV		EDI, [ESP+20]			; store randArray
+ 00000139  8B 7C 24 14			MOV		EDI, [ESP+20]			
 
 					; --------------------------------------------------------------------------------
 				    ;	Start of loop to begin iterating through and printing each value of array
@@ -363,7 +413,7 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 18:53:32
  0000013D			_displayLoop:
  0000013D  8B 04 8F			MOV		EAX, [EDI + ECX * 4]	; store each value of randArray into EAX to print
  00000140  E8 00000000 E		CALL	WriteDec
- 00000145  8B 54 24 10			MOV		EDX, [ESP+16]			; add space after each num
+ 00000145  8B 54 24 10			MOV		EDX, [ESP+16]		
  00000149  E8 00000000 E		CALL	WriteString
  0000014E  33 D2			XOR		EDX, EDX
 
@@ -373,12 +423,11 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 18:53:32
 				    ;	Insert new line
 				    ; --------------------------------------------------------------------
  00000151  8B 5C 24 0C			MOV		EBX, [ESP+12]			; store numPerLine into EBX to use as divisor
-													; compare numPerLine after printing first num
  00000155  8B C1			MOV		EAX, ECX 
  00000157  F7 F3			DIV		EBX
- 00000159  83 FA 00			CMP		EDX, 0
+ 00000159  83 FA 00			CMP		EDX, 0					; compare numPerLine after printing first num
 
- 0000015C  75 05			JNE		_keepPrinting			; if remainder != 0 (IE...20 does not divide index of printed num) 
+ 0000015C  75 05			JNE		_keepPrinting			; if remainder != 0 (20 does not divide index of printed num) 
  0000015E  E8 00000000 E		CALL	CrLf
 
 					; check whether # displayed == length array
@@ -386,13 +435,29 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 18:53:32
  00000163  8B 44 24 08			MOV		EAX, [ESP+8]
  00000167  3B C8			CMP		ECX, EAX
  00000169  75 D2			JNE		_displayLoop
-
  0000016B  5D				POP		EBP
  0000016C  E8 00000000 E		CALL	CrLf
  00000171  C2 0014			RET		20
 
  00000174			displayList	ENDP
 
+				; ---------------------------------------------------------------------------------
+				; Name: sortList
+				;
+				; Sorts the contents of the passed array in ascending order. 
+				;
+				; Preconditions: 
+				;		the array must be type DWORD 
+				;
+				; Postconditions: n/a
+				;
+				; Receives:
+				;		[esp+8]		= address of array count
+				;		[esp+12]	= address of array
+				;
+				; Returns: 
+				;		array in ascending order
+				; ---------------------------------------------------------------------------------
  00000174			sortList PROC
 
  00000174  55				PUSH	EBP						
@@ -438,6 +503,24 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 18:53:32
 
  000001B2			sortList ENDP
 
+				; ---------------------------------------------------------------------------------
+				; Name: exchangeElements
+				;
+				; Swaps the value of the first index with the value of the next index using the 
+				;		bubble-sort algorithm.
+				;
+				; Preconditions: 
+				;		the array must be type DWORD 
+				;
+				; Postconditions: n/a
+				;
+				; Receives:
+				;		[ESP+12]		= address of first value 
+				;		[ESP+8]			= address of second value
+				;
+				; Returns: 
+				;		array with two values swapped
+				; ---------------------------------------------------------------------------------
  000001B2			exchangeElements PROC
 
  000001B2  55				PUSH	EBP							
@@ -465,6 +548,27 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 18:53:32
  000001CC  C2 0008			RET		8
  000001CF			exchangeElements ENDP
 
+				; ---------------------------------------------------------------------------------
+				; Name: displayMedian
+				;
+				; Displays the median of the passed array. 
+				;		Even number length: average of middle two numbers + round-up estimate = median
+				;		Odd number length: middle number = median
+				;
+				; Preconditions: 
+				;		the array must be type DWORD
+				;		the array must be sorted
+				;
+				; Postconditions: EDX changed
+				;
+				; Receives:
+				;		[ESP+8]			= address of filled sorted array 
+				;		[EBP+12]		= address of median label
+				;		ARRAYSIZE is a global variable
+				;
+				; Returns: 
+				;		eax = median integer
+				; ---------------------------------------------------------------------------------
  000001CF			displayMedian PROC
 
  000001CF  55				PUSH	EBP						
@@ -488,21 +592,21 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 18:53:32
 
 					; do odd
  000001ED  33 D2			XOR		EDX, EDX
- 000001EF  8B 7C 24 08			MOV		EDI, [ESP+8]			; reference ADDRESS of filled randArray into EDI
+ 000001EF  8B 7C 24 08			MOV		EDI, [ESP+8]					; reference ADDRESS of filled randArray into EDI
  000001F3  48				DEC		EAX
- 000001F4  8B 04 87			MOV		EAX, [EDI + EAX * 4]	; move [4*index number] places in the array (middle value since odd)
+ 000001F4  8B 04 87			MOV		EAX, [EDI + EAX * 4]			; move [4*index number] places in the array (middle value since odd)
  000001F7  E8 00000000 E		CALL	WriteDec							
  000001FC  EB 2A			JMP		_finish
 
- 000001FE			_evenNum:
 					; do even
+ 000001FE			_evenNum:
  000001FE  33 D2			XOR		EDX, EDX
  00000200  8B 7C 24 08			MOV		EDI, [ESP+8]			
  00000204  50				PUSH	EAX
  00000205  48				DEC		EAX
- 00000206  8B 04 87			MOV		EAX, [EDI + EAX * 4]	;  store (arrayCount / 2)-nth index value 
+ 00000206  8B 04 87			MOV		EAX, [EDI + EAX * 4]			;  store (arrayCount / 2)-nth index value 
  00000209  5B				POP		EBX
- 0000020A  8B 1C 9F			MOV		EBX, [EDI + EBX * 4]	; store (arrayCount / 2 + 1)- nth index value
+ 0000020A  8B 1C 9F			MOV		EBX, [EDI + EBX * 4]			; store (arrayCount / 2 + 1)- nth index value
 
  0000020D  03 C3			ADD		EAX, EBX 
  0000020F  BB 00000002			MOV		EBX, 2
@@ -510,7 +614,7 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 18:53:32
 
  00000216  83 FA 00			CMP		EDX, 0
  00000219  74 08			JE		_noAdd
- 0000021B  40				INC		EAX						; account for half-round up here 
+ 0000021B  40				INC		EAX							; account for half-round up here 
  0000021C  E8 00000000 E		CALL	WriteDec
  00000221  EB 05			JMP		_finish
 
@@ -525,6 +629,26 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 18:53:32
 
  00000236			displayMedian ENDP
 
+				; ---------------------------------------------------------------------------------
+				; Name: countList
+				;
+				; Stores the number of iterations of each unique value from sorted array into 
+				;		a separate array.
+				;
+				; Preconditions: 
+				;		array1 must be type DWORD
+				;		array2 must be type DWORD
+				;
+				; Postconditions: n/a
+				;
+				; Receives:
+				;		[ESP+8]			= address of counts array
+				;		[EBP+12]		= address of randArray
+				;		LO, HI, ARRAYSIZE are global variables
+				;
+				; Returns: 
+				;		an array with the counts of unique values
+				; ---------------------------------------------------------------------------------
  00000236			countList PROC
 
  00000236  55				PUSH	EBP
@@ -583,6 +707,21 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 18:53:32
 
  0000027E			countList ENDP
 
+				; ---------------------------------------------------------------------------------
+				; Name: goodBye
+				;
+				; Displays parting message.
+				;
+				; Preconditions: String must be type BYTE. 
+				;
+				; Postconditions: EDX changed
+				;
+				; Receives:
+				;		[ESP+8]			= address of farewell string
+				;
+				; Returns: n/a
+				;
+				; ---------------------------------------------------------------------------------
  0000027E			goodBye PROC
 
  0000027E  55				PUSH	EBP
@@ -596,7 +735,7 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 18:53:32
  00000290			goodBye ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 18:53:32
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 19:47:46
 <Arrays, Addressing, and Stack-Passed Parameters     (Proj5_  Symbols 2 - 1
 
 

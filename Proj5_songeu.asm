@@ -24,7 +24,7 @@ HI = 50
 	intro2			BYTE	"This program's objective is to pump out 200 random integers from 15 through 50. It will display ",13,10
 					BYTE	"and sort the original list containing the integers, display its median value, then rearrange ",13,10
 					BYTE	"and output the list in ascending order and finally show the number of instances of each ",13,10 
-					BYTE	"generated value, starting with the number of 10s.",13,10,13,10,0
+					BYTE	"generated value, starting with the number of 15s.",13,10,13,10,0
 	unsorted_label	BYTE	"Your unsorted random numbers:",13,10, 0
 	median_label	BYTE	"The median value of the array: ",0 
 	sorted_label	BYTE	"Your sorted random numbers:", 13,10, 0 
