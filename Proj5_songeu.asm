@@ -133,6 +133,21 @@ main PROC
 	Invoke ExitProcess,0
 main ENDP
 
+; ---------------------------------------------------------------------------------
+; Name: introduction
+;
+; Introduces program title, program author and program description.
+;
+; Preconditions: the strings must be type BYTE
+;
+; Postconditions: EDX changed.
+;
+; Receives:
+;		[esp+12]	= address of intro1
+;		[esp+8]		= address of intro2 
+;
+; Returns: n/a
+; ---------------------------------------------------------------------------------
 introduction PROC
 
 	PUSH	EBP						; Step 1) Preserve EBP
@@ -146,10 +161,30 @@ introduction PROC
 	XOR		EDX, EDX
 	
 	POP		EBP						; POP EBP before RET
-	RET		8						; clears pre-call introduction parameters [stack pointer reset]
+	RET		8						; clears pre-call introduction parameters including RET[stack pointer reset]
 
 introduction ENDP
 
+; ---------------------------------------------------------------------------------
+; Name: fillArray
+;
+; Stores random numbers into empty array.
+;
+; Preconditions: 
+;		the array must be type DWORD
+;		CALL Randomize 
+;
+; Postconditions: n/a
+;
+; Receives:
+;		[esp+8]		= address of randArray
+;		[esp+12]	= length of randArray (arrayCount)
+;		HI, LO are global variables
+;
+; Returns: 
+;		array filled with random numbers in no particular order
+;		[EDI+ECX*4]
+; ---------------------------------------------------------------------------------
 fillArray PROC
 
 	PUSH	EBP						
@@ -182,7 +217,6 @@ _loopMe:
 	ADD		EDX, EBX		
 
 	; ------------ at this point, EDX has the randomNum btwn LO & HI -------------
-	
 	MOV		EAX, EDX
 
 	; store/fill in array
@@ -200,22 +234,37 @@ _loopMe:
 		
 fillArray ENDP
 
+; ---------------------------------------------------------------------------------
+; Name: displayList
+;
+; Displays the contents of an array from smallest index to largest index.
+;
+; Preconditions: 
+;		the array must be type DWORD 
+;
+; Postconditions: EAX changed
+;
+; Receives:
+;		[ESP+24]		= address of label for array				 STACK 
+;		[ESP+20]		= address of passed array					 ------- ESP ------------
+;		[ESP+16]		= address of space							 POP EBP	
+;		[ESP+12]		= address of numbers per line				 SIZE OF ARRAY
+;		[ESP+8]			= address of size of array					 NUM PER LINE
+;																	 OFFSET SPACE (" ")
+;																	 OFFSET ARRAY
+;																	 OFFSET LABEL
+; Returns: n/a
+;
+; ---------------------------------------------------------------------------------
 displayList PROC 
 
-	PUSH	EBP									; STACK
-	MOV		EBP, ESP							; ------- ESP ------------	
-												; POP EBP	
-												; RET ADDRESS
-												; SIZE OF ARRAY
-												; NUM PER LINE
-												; OFFSET SPACE (" ")
-												; OFFSET ARRAY
-												; OFFSET LABEL
+	PUSH	EBP					
+	MOV		EBP, ESP								
+								
 	MOV		EDX, [ESP+24]		
 	CALL	WriteString
 	XOR		ECX, ECX
-
-	MOV		EDI, [ESP+20]
+	MOV		EDI, [ESP+20]			
 
 	; --------------------------------------------------------------------------------
     ;	Start of loop to begin iterating through and printing each value of array
@@ -223,38 +272,51 @@ displayList PROC
 _displayLoop:
 	MOV		EAX, [EDI + ECX * 4]	; store each value of randArray into EAX to print
 	CALL	WriteDec
-	MOV		EDX, [ESP+16]			; add space after each num
+	MOV		EDX, [ESP+16]		
 	CALL	WriteString
-
 	XOR		EDX, EDX
 
 	INC		ECX						; increment counter each time a num is displayed
 
-	; -------------------------------
+	; -----------------------------------------------------------------------------
     ;	Insert new line
-    ; ----------------------
+    ; --------------------------------------------------------------------
 	MOV		EBX, [ESP+12]			; store numPerLine into EBX to use as divisor
-									; compare numPerLine after printing first num
 	MOV		EAX, ECX 
 	DIV		EBX
-	CMP		EDX, 0
+	CMP		EDX, 0					; compare numPerLine after printing first num
 
-	JNE		_keepPrinting			; if remainder != 0 (IE...20 does not divide index of printed num) 
+	JNE		_keepPrinting			; if remainder != 0 (20 does not divide index of printed num) 
 	CALL	CrLf
 
+	; check whether # displayed == length array
 _keepPrinting:
-
-	; check whether # displayed is == length array
 	MOV		EAX, [ESP+8]
 	CMP		ECX, EAX
 	JNE		_displayLoop
-
 	POP		EBP
 	CALL	CrLf
 	RET		20
 
 displayList	ENDP
 
+; ---------------------------------------------------------------------------------
+; Name: sortList
+;
+; Sorts the contents of the passed array in ascending order. 
+;
+; Preconditions: 
+;		the array must be type DWORD 
+;
+; Postconditions: n/a
+;
+; Receives:
+;		[esp+8]		= address of array count
+;		[esp+12]	= address of array
+;
+; Returns: 
+;		array in ascending order
+; ---------------------------------------------------------------------------------
 sortList PROC
 
 	PUSH	EBP						
@@ -262,7 +324,7 @@ sortList PROC
 
 	MOV		ECX, [ESP+8]			; store outer loop counter for bubble sort  
 	
-	; for outer loop, iterate through each index once 
+	; iterate through each index once 
 _outerLoop:  
 	MOV		ESI, [ESP+12]			; syntax: MOV ESI, source_address (reference of first value) 
 	MOV		EDX, ECX				; stores ECX value into EDX 
@@ -300,6 +362,24 @@ _exitInner:
 
 sortList ENDP
 
+; ---------------------------------------------------------------------------------
+; Name: exchangeElements
+;
+; Swaps the value of the first index with the value of the next index using the 
+;		bubble-sort algorithm.
+;
+; Preconditions: 
+;		the array must be type DWORD 
+;
+; Postconditions: n/a
+;
+; Receives:
+;		[ESP+12]		= address of first value 
+;		[ESP+8]			= address of second value
+;
+; Returns: 
+;		array with two values swapped
+; ---------------------------------------------------------------------------------
 exchangeElements PROC
 
 	PUSH	EBP							
@@ -327,6 +407,27 @@ exchangeElements PROC
 	RET		8
 exchangeElements ENDP
 
+; ---------------------------------------------------------------------------------
+; Name: displayMedian
+;
+; Displays the median of the passed array. 
+;		Even number length: average of middle two numbers + round-up estimate = median
+;		Odd number length: middle number = median
+;
+; Preconditions: 
+;		the array must be type DWORD
+;		the array must be sorted
+;
+; Postconditions: EDX changed
+;
+; Receives:
+;		[ESP+8]			= address of filled sorted array 
+;		[EBP+12]		= address of median label
+;		ARRAYSIZE is a global variable
+;
+; Returns: 
+;		eax = median integer
+; ---------------------------------------------------------------------------------
 displayMedian PROC
 
 	PUSH	EBP						
@@ -334,12 +435,12 @@ displayMedian PROC
 	
 	; display median label
 	MOV		EDX, [EBP+12]			
-	CALL	WriteString
+	CALL	WriteString	
 
-	; -------------------------------------------------------
+	; ----------------------------------------------------------------------------------------------
     ;	Check length of ARRAYSIZE...
 	;		Adjust accordingly if even or odd
-    ; --------------------------------------------
+    ; ----------------------------------------------------------------------------
 	XOR		EDX, EDX
 	MOV		EAX, ARRAYSIZE	
 	MOV		EBX, 2
@@ -387,6 +488,26 @@ _finish:
 
 displayMedian ENDP
 
+; ---------------------------------------------------------------------------------
+; Name: countList
+;
+; Stores the number of iterations of each unique value from sorted array into 
+;		a separate array.
+;
+; Preconditions: 
+;		array1 must be type DWORD
+;		array2 must be type DWORD
+;
+; Postconditions: n/a
+;
+; Receives:
+;		[ESP+8]			= address of counts array
+;		[EBP+12]		= address of randArray
+;		LO, HI, ARRAYSIZE are global variables
+;
+; Returns: 
+;		an array with the counts of unique values
+; ---------------------------------------------------------------------------------
 countList PROC
 
 	PUSH	EBP
@@ -436,7 +557,7 @@ _nextNum:
 	XOR		EDX, EDX
 	MOV		EDX, HI
 	CMP		EAX, EDX
-	JNG		_top							; JNG b/c INC EAX will 50 -> 51 then check 50 
+	JNG		_top							; JNG b/c INC EAX will 50 -> 51..check 50 
 
 _finish:
 	POP		EBX
@@ -445,16 +566,28 @@ _finish:
 
 countList ENDP
 
+; ---------------------------------------------------------------------------------
+; Name: goodBye
+;
+; Displays parting message.
+;
+; Preconditions: String must be type BYTE. 
+;
+; Postconditions: EDX changed
+;
+; Receives:
+;		[ESP+8]			= address of farewell string
+;
+; Returns: n/a
+;
+; ---------------------------------------------------------------------------------
 goodBye PROC
 
 	PUSH	EBP
 	MOV		EBP, ESP
-
-	; store farewell string into EDX
 	XOR		EDX, EDX
-	MOV		EDX, [ESP+8]
+	MOV		EDX, [ESP+8]					; store farewell string 
 	CALL	WriteString
-	
 	POP		EBP
 	RET		4
 
