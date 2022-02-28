@@ -1,7 +1,7 @@
 TITLE Arrays, Addressing, and Stack-Passed Parameters     (Proj5_songeu.asm)
 
 ; Author: Eugene Song
-; Last Modified: February 23, 2022
+; Last Modified: February 27, 2022
 ; OSU email address: songeu@oregonstate.edu
 ; Course number/section:   CS271 Section 400
 ; Project Number: 5             Due Date: February 27, 2022
@@ -32,12 +32,10 @@ HI = 50
 	farewell_msg	BYTE	"Goodbye, and thanks for coming!", 13,10, 0 
 	space			BYTE	" ", 0 
 
-	someArray		DWORD	ARRAYSIZE DUP (?)	
-	arrayCount		DWORD	LENGTHOF someArray	
+	randArray		DWORD	ARRAYSIZE DUP (?)	
+	arrayCount		DWORD	LENGTHOF randArray	
 	numPerLine		DWORD	20
-	countArray		DWORD	?
-
-
+	counts			DWORD	HI-LO+1 DUP(?)
 
 
 .code
@@ -51,52 +49,49 @@ main PROC
 
 	; fill array first
 	PUSH	arrayCount			
-	PUSH	OFFSET someArray		; push empty array onto stack
+	PUSH	OFFSET randArray		; push empty array onto stack
 	CALL	fillArray
 
 	; display unsorted random nums 
 	PUSH	OFFSET unsorted_label
-	PUSH	OFFSET someArray
+	PUSH	OFFSET randArray
 	PUSH	OFFSET space
 	PUSH	numPerLine
 	CALL	displayList
 	
 	; sort list before outputting the median value
-	PUSH	OFFSET someArray
+	PUSH	OFFSET randArray
 	PUSH	arrayCount
 	CALL	sortList
 
 	; display the median value of sorted random nums
 	PUSH	OFFSET median_label
-	PUSH	OFFSET someArray
+	PUSH	OFFSET randArray
 	CALL	displayMedian 
 
 	; display sorted random nums
 	PUSH	OFFSET sorted_label
-	PUSH	OFFSET someArray
+	PUSH	OFFSET randArray
 	PUSH	OFFSET space
 	PUSH	numPerLine
 	CALL	displayList
 	
 	; generate new array of counts
-	PUSH	OFFSET someArray
-	PUSH	OFFSET countArray
+	PUSH	OFFSET randArray
+	PUSH	OFFSET counts
 	CALL	countList 
 
 	; display the new array of counts
-	;PUSH	OFFSET instance_label
-	;PUSH	OFFSET countArray
-	;PUSH	OFFSET space
-	;PUSH	numPerLine
-	;CALL	displayList
+	PUSH	OFFSET instance_label
+	PUSH	OFFSET counts
+	PUSH	OFFSET space
+	PUSH	numPerLine
+	CALL	displayList
 
 	; display good bye msg
-	;PUSH	OFFSET farewell_msg
-	;CALL	goodBye
+	PUSH	OFFSET farewell_msg
+	CALL	goodBye
 	
-
-
-
 	Invoke ExitProcess,0			; exit to operating system
 main ENDP
 
@@ -152,14 +147,14 @@ _loopMe:
 	MOV		EAX, EDX				; EAX has randomNum btwn LO & HI
 
 	; store/fill in array
-	MOV		EDI, [ESP+8]			; reference 1st address of someArray
+	MOV		EDI, [ESP+8]			; reference 1st address of randArray
 	MOV		[EDI + ECX * 4], EAX	; algorithm to store into each index of array 
 	MOV		EBX, [ESP+12]			; move arrayCount --> EBX
 	INC		ECX
 
 	; compare to array length
 	CMP		ECX, EBX					
-	JNE		_loopMe					; if counter < array.length(someArray)
+	JNE		_loopMe					; if counter < array.length(randArray)
 
 	POP		EBP
 	RET		12
@@ -187,7 +182,7 @@ displayList PROC
 	CALL	WriteString
 	XOR		ECX, ECX				; cleared ECX to start iteration
 
-	MOV		EDI, [ESP+16]			; reference 1st address of filled someArray into EDI
+	MOV		EDI, [ESP+16]			; reference 1st address of filled randArray into EDI
 
 	; begin iterating through and printing each value of array
 _displayLoop:
@@ -322,7 +317,7 @@ displayMedian PROC
 
 	; do odd
 	XOR		EDX, EDX
-	MOV		EDI, [ESP+8]			; reference 1st address of filled someArray into EDI
+	MOV		EDI, [ESP+8]			; reference 1st address of filled randArray into EDI
 	DEC		EAX
 	MOV		EAX, [EDI + EAX * 4]	; move [4 x index number] places in the array (middle value since odd)
 	CALL	WriteDec							
@@ -331,7 +326,7 @@ displayMedian PROC
 _evenNum:
 	; do even
 	XOR		EDX, EDX
-	MOV		EDI, [ESP+8]			; reference 1st address of filled someArray into EDI
+	MOV		EDI, [ESP+8]			; reference 1st address of filled randArray into EDI
 	PUSH	EAX
 	DEC		EAX
 	MOV		EAX, [EDI + EAX * 4]	;  store (arrayCount / 2)-nth index value 
@@ -360,31 +355,68 @@ _finish:
 
 displayMedian ENDP
 
+
+
+
+
 countList PROC
-	
+
 	PUSH	EBP
 	MOV		EBP, ESP
 
-	MOV		
+	MOV		EDI, [EBP+8]					; reference countArray address 0 (EDI)
+	MOV		ESI, [EBP+12]					; reference randArray address 0 (ESI)			
+
+	MOV		EBX, 0							
+	PUSH	EBX
+	
+	MOV		EAX, LO
+	MOV		EBX, 0							; initialize counter (EBX)
+	MOV		ECX, 0					; # times I loop when checking occurence of each value
+
+	; BLOCK OF CODE TO ITERATE THRU randArray and compare value of first element in EAX
 _top:
 
+	CMP		EAX, [ESI+ECX*4]
 
+	; code for if EAX is equal to the value we check
+	JNE		_middle
+	INC		EBX								; counter++ if EAX == ESI+ECX*4
+	
 _middle:
 
+	; block of code to replace EDI (countArray)
 
+	INC		ECX
+	CMP		ECX, ARRAYSIZE
+	JNE		_top							; check only from 0 through ARRAYCOUNT b/c [ESI] is index 0
+
+	XOR		ECX, ECX						; clear ECX since we've already looped thru entire randArray to check
+
+	; code to store EBX (# of counts) into countArray
+
+	; THIS POINT: HAVE EBX = number of counts 
+	POP		ECX
+	MOV		[EDI+ECX*4], EBX				;each time <-- counter == # of indices 
+	INC		ECX
+	PUSH	ECX
+
+_nextNum:
+
+	INC		EAX								; holds LO through HI
+	XOR		EBX, EBX						; clear EBX (counter) to use for next num 
+
+	MOV		EDX, HI
+	CMP		EAX, EDX
+	JNG		_top							; or maybe _middle
+											; use (jmp not greater) b/c INC EBX will 50 -> 51 then check 50 
 _finish:
 
-
+	POP		EBX
 	POP		EBP
 	RET		8
 
 countList ENDP
-
-
-
-
-
-
 
 goodBye PROC
 
@@ -394,22 +426,10 @@ goodBye PROC
 	XOR		EDX, EDX
 	MOV		EDX, [ESP+8]
 	CALL	WriteString
-	CALL	CrLf
-	CALL	CrLf
-
+	
 	POP		EBP
 	RET		4
 
 goodBye ENDP
-
-
-
-
-
-
-
-
-
-
 
 END main

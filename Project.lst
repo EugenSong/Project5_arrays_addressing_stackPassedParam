@@ -1,11 +1,11 @@
-Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/26/22 23:26:24
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 16:10:15
 <Arrays, Addressing, and Stack-Passed Parameters     (Proj5_  Page 1 - 1
 
 
 				TITLE Arrays, Addressing, and Stack-Passed Parameters     (Proj5_songeu.asm)
 
 				; Author: Eugene Song
-				; Last Modified: February 23, 2022
+				; Last Modified: February 27, 2022
 				; OSU email address: songeu@oregonstate.edu
 				; Course number/section:   CS271 Section 400
 				; Project Number: 5             Due Date: February 27, 2022
@@ -141,7 +141,7 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/26/22 23:26:24
 	   64 6F 6D 20 6E
 	   75 6D 62 65 72
 	   73 3A 0D 0A 00
- 000001E9 59 6F 75 72 20		instance_label	BYTE	"Your list of instances of each generated number, starting with the number of 10s:",13,10, 0
+ 000001E9 59 6F 75 72 20		instance_label	BYTE	"Your list of instances of each generated number, starting with the number of 15s:",13,10, 0
 	   6C 69 73 74 20
 	   6F 66 20 69 6E
 	   73 74 61 6E 63
@@ -156,7 +156,7 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/26/22 23:26:24
 	   74 68 20 74 68
 	   65 20 6E 75 6D
 	   62 65 72 20 6F
-	   66 20 31 30 73
+	   66 20 31 35 73
 	   3A 0D 0A 00
  0000023D 47 6F 6F 64 62		farewell_msg	BYTE	"Goodbye, and thanks for coming!", 13,10, 0 
 	   79 65 2C 20 61
@@ -167,13 +167,14 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/26/22 23:26:24
 	   21 0D 0A 00
  0000025F 20 00				space			BYTE	" ", 0 
 
- 00000261  000000C8 [			someArray		DWORD	ARRAYSIZE DUP (?)	
+ 00000261  000000C8 [			randArray		DWORD	ARRAYSIZE DUP (?)	
 	    00000000
 	   ]
- 00000581 000000C8			arrayCount		DWORD	LENGTHOF someArray	
+ 00000581 000000C8			arrayCount		DWORD	LENGTHOF randArray	
  00000585 00000014			numPerLine		DWORD	20
- 00000589 00000000			countArray		DWORD	?
-
+ 00000589  00000024 [			counts			DWORD	HI-LO+1 DUP(?)
+	    00000000
+	   ]
 
 
  00000000			.code
@@ -183,129 +184,131 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/26/22 23:26:24
 					; introduction
  00000005  68 00000000 R		PUSH	OFFSET intro1			; push intro1 to stack
  0000000A  68 0000003A R		PUSH	OFFSET intro2			; push intro2 to stack
- 0000000F  E8 00000079			CALL	introduction
+ 0000000F  E8 0000009D			CALL	introduction
 
 					; fill array first
  00000014  FF 35 00000581 R		PUSH	arrayCount			
- 0000001A  68 00000261 R		PUSH	OFFSET someArray		; push empty array onto stack
- 0000001F  E8 00000086			CALL	fillArray
+ 0000001A  68 00000261 R		PUSH	OFFSET randArray		; push empty array onto stack
+ 0000001F  E8 000000AA			CALL	fillArray
 
 					; display unsorted random nums 
  00000024  68 0000018B R		PUSH	OFFSET unsorted_label
- 00000029  68 00000261 R		PUSH	OFFSET someArray
+ 00000029  68 00000261 R		PUSH	OFFSET randArray
  0000002E  68 0000025F R		PUSH	OFFSET space
  00000033  FF 35 00000585 R		PUSH	numPerLine
- 00000039  E8 000000B2			CALL	displayList
+ 00000039  E8 000000D6			CALL	displayList
 					
 					; sort list before outputting the median value
- 0000003E  68 00000261 R		PUSH	OFFSET someArray
+ 0000003E  68 00000261 R		PUSH	OFFSET randArray
  00000043  FF 35 00000581 R		PUSH	arrayCount
- 00000049  E8 000000EB			CALL	sortList
+ 00000049  E8 0000010F			CALL	sortList
 
 					; display the median value of sorted random nums
  0000004E  68 000001AB R		PUSH	OFFSET median_label
- 00000053  68 00000261 R		PUSH	OFFSET someArray
- 00000058  E8 00000137			CALL	displayMedian 
+ 00000053  68 00000261 R		PUSH	OFFSET randArray
+ 00000058  E8 0000015B			CALL	displayMedian 
 
 					; display sorted random nums
  0000005D  68 000001CB R		PUSH	OFFSET sorted_label
- 00000062  68 00000261 R		PUSH	OFFSET someArray
+ 00000062  68 00000261 R		PUSH	OFFSET randArray
  00000067  68 0000025F R		PUSH	OFFSET space
  0000006C  FF 35 00000585 R		PUSH	numPerLine
- 00000072  E8 00000079			CALL	displayList
+ 00000072  E8 0000009D			CALL	displayList
 					
 					; generate new array of counts
- 00000077  68 00000261 R		PUSH	OFFSET someArray
- 0000007C  68 00000589 R		PUSH	OFFSET countArray
- 00000081  E8 00000175			CALL	countList 
+ 00000077  68 00000261 R		PUSH	OFFSET randArray
+ 0000007C  68 00000589 R		PUSH	OFFSET counts
+ 00000081  E8 00000199			CALL	countList 
 
 					; display the new array of counts
-				;	PUSH	OFFSET instance_label
-				;	PUSH	OFFSET countArray
-				;	PUSH	OFFSET space
-				;	PUSH	numPerLine
-				;	CALL	displayList
+ 00000086  68 000001E9 R		PUSH	OFFSET instance_label
+ 0000008B  68 00000589 R		PUSH	OFFSET counts
+ 00000090  68 0000025F R		PUSH	OFFSET space
+ 00000095  FF 35 00000585 R		PUSH	numPerLine
+ 0000009B  E8 00000074			CALL	displayList
 
-					Invoke ExitProcess,0			; exit to operating system
- 00000086  6A 00	   *	    push   +000000000h
- 00000088  E8 00000000 E   *	    call   ExitProcess
- 0000008D			main ENDP
-
- 0000008D			introduction PROC
-
- 0000008D  55				PUSH	EBP						; Step 1) Preserve EBP
- 0000008E  8B EC			MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
-
- 00000090  8B 54 24 0C			MOV		EDX, [ESP+12]			; move +12 bytes from ESP to store intro1  [base + offset] 
- 00000094  E8 00000000 E		CALL	WriteString
- 00000099  33 D2			XOR		EDX, EDX
- 0000009B  8B 54 24 08			MOV		EDX, [ESP+8]			; move +8 bytes from ESP to store intro2	[base + offset]
- 0000009F  E8 00000000 E		CALL	WriteString
- 000000A4  33 D2			XOR		EDX, EDX
+					; display good bye msg
+ 000000A0  68 0000023D R		PUSH	OFFSET farewell_msg
+ 000000A5  E8 000001BB			CALL	goodBye
 					
- 000000A6  5D				POP		EBP
- 000000A7  C2 0008			RET		8						; clears pre-call introduction parameters [stack pointer reset]
+					Invoke ExitProcess,0			; exit to operating system
+ 000000AA  6A 00	   *	    push   +000000000h
+ 000000AC  E8 00000000 E   *	    call   ExitProcess
+ 000000B1			main ENDP
 
- 000000AA			introduction ENDP
+ 000000B1			introduction PROC
 
- 000000AA			fillArray PROC
+ 000000B1  55				PUSH	EBP						; Step 1) Preserve EBP
+ 000000B2  8B EC			MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
 
- 000000AA  55				PUSH	EBP						; Step 1) Preserve EBP
- 000000AB  8B EC			MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
+ 000000B4  8B 54 24 0C			MOV		EDX, [ESP+12]			; move +12 bytes from ESP to store intro1  [base + offset] 
+ 000000B8  E8 00000000 E		CALL	WriteString
+ 000000BD  33 D2			XOR		EDX, EDX
+ 000000BF  8B 54 24 08			MOV		EDX, [ESP+8]			; move +8 bytes from ESP to store intro2	[base + offset]
+ 000000C3  E8 00000000 E		CALL	WriteString
+ 000000C8  33 D2			XOR		EDX, EDX
+					
+ 000000CA  5D				POP		EBP
+ 000000CB  C2 0008			RET		8						; clears pre-call introduction parameters [stack pointer reset]
+
+ 000000CE			introduction ENDP
+
+ 000000CE			fillArray PROC
+
+ 000000CE  55				PUSH	EBP						; Step 1) Preserve EBP
+ 000000CF  8B EC			MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
 
 					; generate arraySize-n random numbers
 
- 000000AD  33 C9			XOR		ECX, ECX
- 000000AF			_loopMe:
+ 000000D1  33 C9			XOR		ECX, ECX
+ 000000D3			_loopMe:
 
- 000000AF  B8 00000032			MOV		EAX, HI					; upper bound
- 000000B4  83 C0 01			ADD		EAX, 1					; EAX + 1 to include upper range
- 000000B7  E8 00000000 E		CALL	RandomRange				; takes EAX (upper); outputs new EAX 
- 000000BC  BB 0000000F			MOV		EBX, LO
- 000000C1  50				PUSH	EAX						; store seed value --> stack
- 000000C2  B8 00000032			MOV		EAX, HI
- 000000C7  83 C0 01			ADD		EAX, 1					; to include upper range again
- 000000CA  2B C3			SUB		EAX, EBX				; upper - lower --> EAX
+ 000000D3  B8 00000032			MOV		EAX, HI					; upper bound
+ 000000D8  83 C0 01			ADD		EAX, 1					; EAX + 1 to include upper range
+ 000000DB  E8 00000000 E		CALL	RandomRange				; takes EAX (upper); outputs new EAX 
+ 000000E0  BB 0000000F			MOV		EBX, LO
+ 000000E5  50				PUSH	EAX						; store seed value --> stack
+ 000000E6  B8 00000032			MOV		EAX, HI
+ 000000EB  83 C0 01			ADD		EAX, 1					; to include upper range again
+ 000000EE  2B C3			SUB		EAX, EBX				; upper - lower --> EAX
 
 						; switch EAX / EBX to prepare for div
- 000000CC  8B D8			MOV		EBX, EAX
- 000000CE  58				POP		EAX						; popped off seed --> EAX 
+ 000000F0  8B D8			MOV		EBX, EAX
+ 000000F2  58				POP		EAX						; popped off seed --> EAX 
 
 						; EAX (seed) / EBX (upper-lower) at this point
- 000000CF  33 D2			XOR		EDX, EDX
- 000000D1  F7 F3			DIV		EBX						; randomNum = seed % (upper-lower) + lower
+ 000000F3  33 D2			XOR		EDX, EDX
+ 000000F5  F7 F3			DIV		EBX						; randomNum = seed % (upper-lower) + lower
 
- 000000D3  BB 0000000F			MOV		EBX, LO
- 000000D8  03 D3			ADD		EDX, EBX		
+ 000000F7  BB 0000000F			MOV		EBX, LO
+ 000000FC  03 D3			ADD		EDX, EBX		
+
 						; at this point, EDX has the randomNum btwn LO & HI
 
- 000000DA  8B C2			MOV		EAX, EDX				; EAX has randomNum btwn LO & HI
-
-				;	CALL	WriteDec		; ignore and remove later (used to check if array filled)
-				;	CALL	CrLf
+ 000000FE  8B C2			MOV		EAX, EDX				; EAX has randomNum btwn LO & HI
 
 					; store/fill in array
- 000000DC  8B 7C 24 08			MOV		EDI, [ESP+8]			; reference 1st address of someArray
- 000000E0  89 04 8F			MOV		[EDI + ECX * 4], EAX	; algorithm to store into each index of array 
- 000000E3  8B 5C 24 0C			MOV		EBX, [ESP+12]			; move arrayCount --> EBX
- 000000E7  41				INC		ECX
+ 00000100  8B 7C 24 08			MOV		EDI, [ESP+8]			; reference 1st address of randArray
+ 00000104  89 04 8F			MOV		[EDI + ECX * 4], EAX	; algorithm to store into each index of array 
+ 00000107  8B 5C 24 0C			MOV		EBX, [ESP+12]			; move arrayCount --> EBX
+ 0000010B  41				INC		ECX
 
 					; compare to array length
- 000000E8  3B CB			CMP		ECX, EBX					
- 000000EA  75 C3			JNE		_loopMe					; if counter < array.length(someArray)
+ 0000010C  3B CB			CMP		ECX, EBX					
+ 0000010E  75 C3			JNE		_loopMe					; if counter < array.length(randArray)
 
- 000000EC  5D				POP		EBP
- 000000ED  C2 000C			RET		12
+ 00000110  5D				POP		EBP
+ 00000111  C2 000C			RET		12
 						
- 000000F0			fillArray ENDP
+ 00000114			fillArray ENDP
 
- 000000F0			displayList PROC
+ 00000114			displayList PROC
 
 				; ONLY ONE DISPLAYLIST PROC for 3 different arrays to print; therefore universally PUSH labels / values the 
 
 
- 000000F0  55				PUSH	EBP						; Step 1) Preserve EBP
- 000000F1  8B EC			MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
+ 00000114  55				PUSH	EBP						; Step 1) Preserve EBP
+ 00000115  8B EC			MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
 
 					; STACK
 					; --------------------------
@@ -316,195 +319,262 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/26/22 23:26:24
 					; OFFSET ARRAY
 					; OFFSET LABEL
 
- 000000F3  8B 54 24 14			MOV		EDX, [ESP+20]			; LABEL OFFSET IS ALWAYS @ BOTTOM MOST OF STACK			
- 000000F7  E8 00000000 E		CALL	WriteString
- 000000FC  33 C9			XOR		ECX, ECX				; cleared ECX to start iteration
+ 00000117  8B 54 24 14			MOV		EDX, [ESP+20]			; LABEL OFFSET IS ALWAYS @ BOTTOM MOST OF STACK			
+ 0000011B  E8 00000000 E		CALL	WriteString
+ 00000120  33 C9			XOR		ECX, ECX				; cleared ECX to start iteration
 
- 000000FE  8B 7C 24 10			MOV		EDI, [ESP+16]			; reference 1st address of filled someArray into EDI
+ 00000122  8B 7C 24 10			MOV		EDI, [ESP+16]			; reference 1st address of filled randArray into EDI
 
 					; begin iterating through and printing each value of array
- 00000102			_displayLoop:
- 00000102  8B 04 8F			MOV		EAX, [EDI + ECX * 4]	; store each value of array into EAX to print
- 00000105  E8 00000000 E		CALL	WriteDec
- 0000010A  8B 54 24 0C			MOV		EDX, [ESP+12]			; create space after each number
- 0000010E  E8 00000000 E		CALL	WriteString
+ 00000126			_displayLoop:
+ 00000126  8B 04 8F			MOV		EAX, [EDI + ECX * 4]	; store each value of array into EAX to print
+ 00000129  E8 00000000 E		CALL	WriteDec
+ 0000012E  8B 54 24 0C			MOV		EDX, [ESP+12]			; create space after each number
+ 00000132  E8 00000000 E		CALL	WriteString
 
- 00000113  33 D2			XOR		EDX, EDX				; clear EDX to use in DIV
+ 00000137  33 D2			XOR		EDX, EDX				; clear EDX to use in DIV
 
- 00000115  41				INC		ECX						; increment counter each time num is displayed
+ 00000139  41				INC		ECX						; increment counter each time num is displayed
 
 					; insert new lines here 
 
- 00000116  8B 5C 24 08			MOV		EBX, [ESP+8]			; store numPerLine into EBX to use as divisor
+ 0000013A  8B 5C 24 08			MOV		EBX, [ESP+8]			; store numPerLine into EBX to use as divisor
 													; compare numPerLine after printing first num
- 0000011A  8B C1			MOV		EAX, ECX 
- 0000011C  F7 F3			DIV		EBX
- 0000011E  83 FA 00			CMP		EDX, 0
+ 0000013E  8B C1			MOV		EAX, ECX 
+ 00000140  F7 F3			DIV		EBX
+ 00000142  83 FA 00			CMP		EDX, 0
 
- 00000121  75 05			JNE		_keepPrinting			; if remainder != 0 (IE...20 does not divide index of printed num) 
- 00000123  E8 00000000 E		CALL	CrLf
+ 00000145  75 05			JNE		_keepPrinting			; if remainder != 0 (IE...20 does not divide index of printed num) 
+ 00000147  E8 00000000 E		CALL	CrLf
 
- 00000128			_keepPrinting:
+ 0000014C			_keepPrinting:
 					; check whether # displayed is == length array
- 00000128  81 F9 000000C8		CMP		ECX, ARRAYSIZE
- 0000012E  75 D2			JNE		_displayLoop
+ 0000014C  81 F9 000000C8		CMP		ECX, ARRAYSIZE
+ 00000152  75 D2			JNE		_displayLoop
 
- 00000130  5D				POP		EBP
- 00000131  E8 00000000 E		CALL	CrLf
- 00000136  C2 0010			RET		16
+ 00000154  5D				POP		EBP
+ 00000155  E8 00000000 E		CALL	CrLf
+ 0000015A  C2 0010			RET		16
 
- 00000139			displayList	ENDP
+ 0000015D			displayList	ENDP
 
- 00000139			sortList PROC
+ 0000015D			sortList PROC
 
 					; BUBBLE SORT (n^2) 
 					; NESTED LOOP
 
- 00000139  55				PUSH	EBP						; Step 1) Preserve EBP
- 0000013A  8B EC			MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
+ 0000015D  55				PUSH	EBP						; Step 1) Preserve EBP
+ 0000015E  8B EC			MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
 
- 0000013C  8B 4C 24 08			MOV		ECX, [ESP+8]			; store outer loop counter for bubble sort  
+ 00000160  8B 4C 24 08			MOV		ECX, [ESP+8]			; store outer loop counter for bubble sort  
 					
- 00000140			_outerLoop: ; do nothing except iterate through each index once 
+ 00000164			_outerLoop: ; do nothing except iterate through each index once 
 					
- 00000140  8B 74 24 0C			MOV		ESI, [ESP+12]			; syntax: MOV ESI, source_address (reference of first value) 
- 00000144  8B D1			MOV		EDX, ECX				; stores ECX value into EDX 
+ 00000164  8B 74 24 0C			MOV		ESI, [ESP+12]			; syntax: MOV ESI, source_address (reference of first value) 
+ 00000168  8B D1			MOV		EDX, ECX				; stores ECX value into EDX 
 
- 00000146  8B 4C 24 08			MOV		ECX, [ESP+8]			; reset ECX's value to 200 after each outer iteration
+ 0000016A  8B 4C 24 08			MOV		ECX, [ESP+8]			; reset ECX's value to 200 after each outer iteration
 
- 0000014A			_innerLoop:	
+ 0000016E			_innerLoop:	
 
 					; address of index 0 of filled array
- 0000014A  8B 06			MOV		EAX, [ESI]				; store first value into EAX to compare
- 0000014C  8B 5E 04			MOV		EBX, [ESI+4]			; store second value into EBX to compare
+ 0000016E  8B 06			MOV		EAX, [ESI]				; store first value into EAX to compare
+ 00000170  8B 5E 04			MOV		EBX, [ESI+4]			; store second value into EBX to compare
 
- 0000014F  3B C3			CMP		EAX, EBX
- 00000151  7E 12			JLE		_goBackUp
+ 00000173  3B C3			CMP		EAX, EBX
+ 00000175  7E 12			JLE		_goBackUp
 
- 00000153  56				PUSH	ESI						; push element one reference
- 00000154  83 C6 04			ADD		ESI,4
- 00000157  56				PUSH	ESI						; push element two reference
- 00000158  83 EE 04			SUB		ESI, 4					; reset value of ESI for inner loop
 					
- 0000015B  89 1E			MOV		[ESI], EBX
- 0000015D  89 46 04			MOV		[ESI+4], EAX
+ 00000177  56				PUSH	ESI						; push element one reference
+ 00000178  83 C6 04			ADD		ESI,4
+ 0000017B  56				PUSH	ESI						; push element two reference
+ 0000017C  83 EE 04			SUB		ESI, 4					; reset value of ESI for inner loop
+					
+ 0000017F  89 1E			MOV		[ESI], EBX
+ 00000181  89 46 04			MOV		[ESI+4], EAX
 
 					; swap elements
- 00000160  E8 00000012			CALL	exchangeElements
+ 00000184  E8 00000012			CALL	exchangeElements
 					
- 00000165			_goBackUp:
+ 00000189			_goBackUp:
 
- 00000165  83 C6 04			ADD		ESI, 4					; increment by 4 memory addresses once nums have been checked
- 00000168  83 F9 01			CMP		ECX, 1h				; only want to iterate through innerLoop 199 times so I don't go out of array range
- 0000016B  74 02			JE		_exitInner
- 0000016D  E2 DB			LOOP	_innerLoop				
+ 00000189  83 C6 04			ADD		ESI, 4					; increment by 4 memory addresses once nums have been checked
+ 0000018C  83 F9 01			CMP		ECX, 1h				; only want to iterate through innerLoop 199 times so I don't go out of array range
+ 0000018F  74 02			JE		_exitInner
+ 00000191  E2 DB			LOOP	_innerLoop				
 
- 0000016F			_exitInner:
+ 00000193			_exitInner:
 
- 0000016F  8B CA			MOV		ECX, EDX
- 00000171  E2 CD			LOOP	_outerLoop
+ 00000193  8B CA			MOV		ECX, EDX
+ 00000195  E2 CD			LOOP	_outerLoop
 
- 00000173  5D				POP		EBP
- 00000174  C2 0008			RET		8
+ 00000197  5D				POP		EBP
+ 00000198  C2 0008			RET		8
 
- 00000177			sortList ENDP
+ 0000019B			sortList ENDP
 
- 00000177			exchangeElements PROC
+ 0000019B			exchangeElements PROC
 
- 00000177  55				PUSH	EBP							; standard ebp push
- 00000178  8B EC			MOV		EBP, ESP					; standard static base pointer
- 0000017A  8B 44 24 0C			MOV		EAX, [ESP+12]				; grab ESI location 
- 0000017E  8B 5C 24 08			MOV		EBX, [ESP+8]				; grab ESI + 4 location 
+ 0000019B  55				PUSH	EBP							; standard ebp push
+ 0000019C  8B EC			MOV		EBP, ESP					; standard static base pointer
+ 0000019E  8B 44 24 0C			MOV		EAX, [ESP+12]				; grab ESI location 
+ 000001A2  8B 5C 24 08			MOV		EBX, [ESP+8]				; grab ESI + 4 location 
 
 				; turn EAX / EBX into their stack location's values 
- 00000182  50				PUSH	EAX
- 00000183  8B 03			MOV		EAX, [EBX]
- 00000185  5B				POP		EBX
- 00000186  50				PUSH	EAX
- 00000187  8B 03			MOV		EAX, [EBX]
- 00000189  5B				POP		EBX
+ 000001A6  50				PUSH	EAX
+ 000001A7  8B 03			MOV		EAX, [EBX]
+ 000001A9  5B				POP		EBX
+ 000001AA  50				PUSH	EAX
+ 000001AB  8B 03			MOV		EAX, [EBX]
+ 000001AD  5B				POP		EBX
 
 				; exchange the two values 
- 0000018A  93				XCHG	EBX, EAX
+ 000001AE  93				XCHG	EBX, EAX
 
 				; store back into respective array slots
- 0000018B  89 46 04			MOV		[ESI+4], EAX
- 0000018E  89 1E			MOV		[ESI], EBX
+ 000001AF  89 46 04			MOV		[ESI+4], EAX
+ 000001B2  89 1E			MOV		[ESI], EBX
 
- 00000190  5D				POP		EBP
- 00000191  C2 0008			RET		8
- 00000194			exchangeElements ENDP
+ 000001B4  5D				POP		EBP
+ 000001B5  C2 0008			RET		8
+ 000001B8			exchangeElements ENDP
 
- 00000194			displayMedian PROC
+ 000001B8			displayMedian PROC
 
- 00000194  55				PUSH	EBP						; Step 1) Preserve EBP
- 00000195  8B EC			MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
+ 000001B8  55				PUSH	EBP						; Step 1) Preserve EBP
+ 000001B9  8B EC			MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
 
- 00000197  8B 55 0C			MOV		EDX, [EBP+12]			
- 0000019A  E8 00000000 E		CALL	WriteString
+ 000001BB  8B 55 0C			MOV		EDX, [EBP+12]			
+ 000001BE  E8 00000000 E		CALL	WriteString
 
 					; check length of array size
- 0000019F  33 D2			XOR		EDX, EDX				; clear EDX to use for div
- 000001A1  B8 000000C8			MOV		EAX, ARRAYSIZE	
- 000001A6  BB 00000002			MOV		EBX, 2
- 000001AB  F7 F3			DIV		EBX						 
+ 000001C3  33 D2			XOR		EDX, EDX				; clear EDX to use for div
+ 000001C5  B8 000000C8			MOV		EAX, ARRAYSIZE	
+ 000001CA  BB 00000002			MOV		EBX, 2
+ 000001CF  F7 F3			DIV		EBX						 
 
- 000001AD  83 FA 00			CMP		EDX, 0
- 000001B0  74 11			JE		_evenNum
+ 000001D1  83 FA 00			CMP		EDX, 0
+ 000001D4  74 11			JE		_evenNum
 
 					; do odd
- 000001B2  33 D2			XOR		EDX, EDX
- 000001B4  8B 7C 24 08			MOV		EDI, [ESP+8]			; reference 1st address of filled someArray into EDI
- 000001B8  48				DEC		EAX
- 000001B9  8B 04 87			MOV		EAX, [EDI + EAX * 4]	; move [4 x index number] places in the array (middle value since odd)
- 000001BC  E8 00000000 E		CALL	WriteDec							
- 000001C1  EB 2A			JMP		_finish
+ 000001D6  33 D2			XOR		EDX, EDX
+ 000001D8  8B 7C 24 08			MOV		EDI, [ESP+8]			; reference 1st address of filled randArray into EDI
+ 000001DC  48				DEC		EAX
+ 000001DD  8B 04 87			MOV		EAX, [EDI + EAX * 4]	; move [4 x index number] places in the array (middle value since odd)
+ 000001E0  E8 00000000 E		CALL	WriteDec							
+ 000001E5  EB 2A			JMP		_finish
 
- 000001C3			_evenNum:
+ 000001E7			_evenNum:
 					; do even
- 000001C3  33 D2			XOR		EDX, EDX
- 000001C5  8B 7C 24 08			MOV		EDI, [ESP+8]			; reference 1st address of filled someArray into EDI
- 000001C9  50				PUSH	EAX
- 000001CA  48				DEC		EAX
- 000001CB  8B 04 87			MOV		EAX, [EDI + EAX * 4]	;  store (arrayCount / 2)-nth index value 
- 000001CE  5B				POP		EBX
- 000001CF  8B 1C 9F			MOV		EBX, [EDI + EBX * 4]	; store (arrayCount / 2 + 1)- nth index value
+ 000001E7  33 D2			XOR		EDX, EDX
+ 000001E9  8B 7C 24 08			MOV		EDI, [ESP+8]			; reference 1st address of filled randArray into EDI
+ 000001ED  50				PUSH	EAX
+ 000001EE  48				DEC		EAX
+ 000001EF  8B 04 87			MOV		EAX, [EDI + EAX * 4]	;  store (arrayCount / 2)-nth index value 
+ 000001F2  5B				POP		EBX
+ 000001F3  8B 1C 9F			MOV		EBX, [EDI + EBX * 4]	; store (arrayCount / 2 + 1)- nth index value
 
- 000001D2  03 C3			ADD		EAX, EBX 
- 000001D4  BB 00000002			MOV		EBX, 2
- 000001D9  F7 F3			DIV		EBX
+ 000001F6  03 C3			ADD		EAX, EBX 
+ 000001F8  BB 00000002			MOV		EBX, 2
+ 000001FD  F7 F3			DIV		EBX
 
- 000001DB  83 FA 00			CMP		EDX, 0
- 000001DE  74 08			JE		_noAdd
- 000001E0  40				INC		EAX						; half- round up here 
- 000001E1  E8 00000000 E		CALL	WriteDec
- 000001E6  EB 05			JMP		_finish
+ 000001FF  83 FA 00			CMP		EDX, 0
+ 00000202  74 08			JE		_noAdd
+ 00000204  40				INC		EAX						; half- round up here 
+ 00000205  E8 00000000 E		CALL	WriteDec
+ 0000020A  EB 05			JMP		_finish
 
- 000001E8			_noAdd:
- 000001E8  E8 00000000 E		CALL	WriteDec
+ 0000020C			_noAdd:
+ 0000020C  E8 00000000 E		CALL	WriteDec
 
- 000001ED			_finish:
+ 00000211			_finish:
 
- 000001ED  E8 00000000 E		CALL	CrLf
- 000001F2  E8 00000000 E		CALL	CrLf
- 000001F7  5D				POP		EBP
- 000001F8  C2 0008			RET		8
+ 00000211  E8 00000000 E		CALL	CrLf
+ 00000216  E8 00000000 E		CALL	CrLf
+ 0000021B  5D				POP		EBP
+ 0000021C  C2 0008			RET		8
 
- 000001FB			displayMedian ENDP
+ 0000021F			displayMedian ENDP
 
- 000001FB			countList PROC
+
+
+
+
+ 0000021F			countList PROC
+
+ 0000021F  55				PUSH	EBP
+ 00000220  8B EC			MOV		EBP, ESP
+
+ 00000222  8B 7D 08			MOV		EDI, [EBP+8]					; reference countArray address 0 (EDI)
+ 00000225  8B 75 0C			MOV		ESI, [EBP+12]					; reference randArray address 0 (ESI)			
+
+ 00000228  BB 00000000			MOV		EBX, 0							
+ 0000022D  53				PUSH	EBX
 					
- 000001FB  55				PUSH	EBP
- 000001FC  8B EC			MOV		EBP, ESP
+ 0000022E  B8 0000000F			MOV		EAX, LO
+ 00000233  BB 00000000			MOV		EBX, 0							; initialize counter (EBX)
+ 00000238  B9 00000000			MOV		ECX, 0					; # times I loop when checking occurence of each value
 
+					; BLOCK OF CODE TO ITERATE THRU randArray and compare value of first element in EAX
+ 0000023D			_top:
 
- 000001FE  5D				POP		EBP
- 000001FF  C2 0008			RET		8
+ 0000023D  3B 04 8E			CMP		EAX, [ESI+ECX*4]
 
- 00000202			countList ENDP
+					; code for if EAX is equal to the value we check
+ 00000240  75 01			JNE		_middle
+ 00000242  43				INC		EBX								; counter++ if EAX == ESI+ECX*4
+					
+ 00000243			_middle:
+
+					; block of code to replace EDI (countArray)
+
+ 00000243  41				INC		ECX
+ 00000244  81 F9 000000C8		CMP		ECX, ARRAYSIZE
+ 0000024A  75 F1			JNE		_top							; check only from 0 through ARRAYCOUNT b/c [ESI] is index 0
+
+ 0000024C  33 C9			XOR		ECX, ECX						; clear ECX since we've already looped thru entire randArray to check
+
+					; code to store EBX (# of counts) into countArray
+
+					; THIS POINT: HAVE EBX = number of counts 
+ 0000024E  59				POP		ECX
+ 0000024F  89 1C 8F			MOV		[EDI+ECX*4], EBX				;each time <-- counter == # of indices 
+ 00000252  41				INC		ECX
+ 00000253  51				PUSH	ECX
+
+ 00000254			_nextNum:
+
+ 00000254  40				INC		EAX								; holds LO through HI
+ 00000255  33 DB			XOR		EBX, EBX						; clear EBX (counter) to use for next num 
+
+ 00000257  BA 00000032			MOV		EDX, HI
+ 0000025C  3B C2			CMP		EAX, EDX
+ 0000025E  7E DD			JNG		_top							; or maybe _middle
+															; use (jmp not greater) b/c INC EBX will 50 -> 51 then check 50 
+ 00000260			_finish:
+
+ 00000260  5B				POP		EBX
+ 00000261  5D				POP		EBP
+ 00000262  C2 0008			RET		8
+
+ 00000265			countList ENDP
+
+ 00000265			goodBye PROC
+
+ 00000265  55				PUSH	EBP
+ 00000266  8B EC			MOV		EBP, ESP
+
+ 00000268  33 D2			XOR		EDX, EDX
+ 0000026A  8B 54 24 08			MOV		EDX, [ESP+8]
+ 0000026E  E8 00000000 E		CALL	WriteString
+					
+ 00000273  5D				POP		EBP
+ 00000274  C2 0004			RET		4
+
+ 00000277			goodBye ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/26/22 23:26:24
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 16:10:15
 <Arrays, Addressing, and Stack-Passed Parameters     (Proj5_  Symbols 2 - 1
 
 
@@ -598,8 +668,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 0000058D Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000202 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000619 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000277 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -706,26 +776,31 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-countList  . . . . . . . . . . .	P Near	 000001FB _TEXT	Length= 00000007 Public STDCALL
-displayList  . . . . . . . . . .	P Near	 000000F0 _TEXT	Length= 00000049 Public STDCALL
-  _displayLoop . . . . . . . . .	L Near	 00000102 _TEXT	
-  _keepPrinting  . . . . . . . .	L Near	 00000128 _TEXT	
-displayMedian  . . . . . . . . .	P Near	 00000194 _TEXT	Length= 00000067 Public STDCALL
-  _evenNum . . . . . . . . . . .	L Near	 000001C3 _TEXT	
-  _noAdd . . . . . . . . . . . .	L Near	 000001E8 _TEXT	
-  _finish  . . . . . . . . . . .	L Near	 000001ED _TEXT	
-exchangeElements . . . . . . . .	P Near	 00000177 _TEXT	Length= 0000001D Public STDCALL
-fillArray  . . . . . . . . . . .	P Near	 000000AA _TEXT	Length= 00000046 Public STDCALL
-  _loopMe  . . . . . . . . . . .	L Near	 000000AF _TEXT	
-introduction . . . . . . . . . .	P Near	 0000008D _TEXT	Length= 0000001D Public STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000008D Public STDCALL
+countList  . . . . . . . . . . .	P Near	 0000021F _TEXT	Length= 00000046 Public STDCALL
+  _top . . . . . . . . . . . . .	L Near	 0000023D _TEXT	
+  _middle  . . . . . . . . . . .	L Near	 00000243 _TEXT	
+  _nextNum . . . . . . . . . . .	L Near	 00000254 _TEXT	
+  _finish  . . . . . . . . . . .	L Near	 00000260 _TEXT	
+displayList  . . . . . . . . . .	P Near	 00000114 _TEXT	Length= 00000049 Public STDCALL
+  _displayLoop . . . . . . . . .	L Near	 00000126 _TEXT	
+  _keepPrinting  . . . . . . . .	L Near	 0000014C _TEXT	
+displayMedian  . . . . . . . . .	P Near	 000001B8 _TEXT	Length= 00000067 Public STDCALL
+  _evenNum . . . . . . . . . . .	L Near	 000001E7 _TEXT	
+  _noAdd . . . . . . . . . . . .	L Near	 0000020C _TEXT	
+  _finish  . . . . . . . . . . .	L Near	 00000211 _TEXT	
+exchangeElements . . . . . . . .	P Near	 0000019B _TEXT	Length= 0000001D Public STDCALL
+fillArray  . . . . . . . . . . .	P Near	 000000CE _TEXT	Length= 00000046 Public STDCALL
+  _loopMe  . . . . . . . . . . .	L Near	 000000D3 _TEXT	
+goodBye  . . . . . . . . . . . .	P Near	 00000265 _TEXT	Length= 00000012 Public STDCALL
+introduction . . . . . . . . . .	P Near	 000000B1 _TEXT	Length= 0000001D Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000B1 Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
-sortList . . . . . . . . . . . .	P Near	 00000139 _TEXT	Length= 0000003E Public STDCALL
-  _outerLoop . . . . . . . . . .	L Near	 00000140 _TEXT	
-  _innerLoop . . . . . . . . . .	L Near	 0000014A _TEXT	
-  _goBackUp  . . . . . . . . . .	L Near	 00000165 _TEXT	
-  _exitInner . . . . . . . . . .	L Near	 0000016F _TEXT	
+sortList . . . . . . . . . . . .	P Near	 0000015D _TEXT	Length= 0000003E Public STDCALL
+  _outerLoop . . . . . . . . . .	L Near	 00000164 _TEXT	
+  _innerLoop . . . . . . . . . .	L Near	 0000016E _TEXT	
+  _goBackUp  . . . . . . . . . .	L Near	 00000189 _TEXT	
+  _exitInner . . . . . . . . . .	L Near	 00000193 _TEXT	
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 
 
@@ -949,7 +1024,7 @@ arrayCount . . . . . . . . . . .	DWord	 00000581 _DATA
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
-countArray . . . . . . . . . . .	DWord	 00000589 _DATA	
+counts . . . . . . . . . . . . .	DWord	 00000589 _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
 farewell_msg . . . . . . . . . .	Byte	 0000023D _DATA	
@@ -967,8 +1042,8 @@ lightRed . . . . . . . . . . . .	Number	 0000000Ch
 magenta  . . . . . . . . . . . .	Number	 00000005h   
 median_label . . . . . . . . . .	Byte	 000001AB _DATA	
 numPerLine . . . . . . . . . . .	DWord	 00000585 _DATA	
+randArray  . . . . . . . . . . .	DWord	 00000261 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-someArray  . . . . . . . . . . .	DWord	 00000261 _DATA	
 sorted_label . . . . . . . . . .	Byte	 000001CB _DATA	
 space  . . . . . . . . . . . . .	Byte	 0000025F _DATA	
 unsorted_label . . . . . . . . .	Byte	 0000018B _DATA	
