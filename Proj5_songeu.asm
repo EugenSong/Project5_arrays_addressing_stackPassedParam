@@ -29,13 +29,14 @@ HI = 50
 	median_label	BYTE	"The median value of the array: ",0 
 	sorted_label	BYTE	"Your sorted random numbers:", 13,10, 0 
 	instance_label	BYTE	"Your list of instances of each generated number, starting with the number of 15s:",13,10, 0
-	farewell_msg	BYTE	"Goodbye, and thanks for coming!", 13,10, 0 
+	farewell_msg	BYTE	"Goodbye and see you in Project 6!", 13,10, 0 
 	space			BYTE	" ", 0 
 
 	randArray		DWORD	ARRAYSIZE DUP (?)	
 	arrayCount		DWORD	LENGTHOF randArray	
 	numPerLine		DWORD	20
 	counts			DWORD	HI-LO+1 DUP(?)
+	countsCount		DWORD	LENGTHOF counts
 
 
 .code
@@ -57,6 +58,7 @@ main PROC
 	PUSH	OFFSET randArray
 	PUSH	OFFSET space
 	PUSH	numPerLine
+	PUSH	arrayCount
 	CALL	displayList
 	
 	; sort list before outputting the median value
@@ -74,6 +76,7 @@ main PROC
 	PUSH	OFFSET randArray
 	PUSH	OFFSET space
 	PUSH	numPerLine
+	PUSH	arrayCount
 	CALL	displayList
 	
 	; generate new array of counts
@@ -86,7 +89,9 @@ main PROC
 	PUSH	OFFSET counts
 	PUSH	OFFSET space
 	PUSH	numPerLine
+	PUSH	countsCount
 	CALL	displayList
+	CALL	CrLf
 
 	; display good bye msg
 	PUSH	OFFSET farewell_msg
@@ -178,17 +183,17 @@ displayList PROC
 	; OFFSET ARRAY
 	; OFFSET LABEL
 
-	MOV		EDX, [ESP+20]			; LABEL OFFSET IS ALWAYS @ BOTTOM MOST OF STACK			
+	MOV		EDX, [ESP+24]			; LABEL OFFSET IS ALWAYS @ BOTTOM MOST OF STACK			
 	CALL	WriteString
 	XOR		ECX, ECX				; cleared ECX to start iteration
 
-	MOV		EDI, [ESP+16]			; reference 1st address of filled randArray into EDI
+	MOV		EDI, [ESP+20]			; reference 1st address of filled randArray into EDI
 
 	; begin iterating through and printing each value of array
 _displayLoop:
 	MOV		EAX, [EDI + ECX * 4]	; store each value of array into EAX to print
 	CALL	WriteDec
-	MOV		EDX, [ESP+12]			; create space after each number
+	MOV		EDX, [ESP+16]			; create space after each number
 	CALL	WriteString
 
 	XOR		EDX, EDX				; clear EDX to use in DIV
@@ -197,7 +202,7 @@ _displayLoop:
 
 	; insert new lines here 
 
-	MOV		EBX, [ESP+8]			; store numPerLine into EBX to use as divisor
+	MOV		EBX, [ESP+12]			; store numPerLine into EBX to use as divisor
 									; compare numPerLine after printing first num
 	MOV		EAX, ECX 
 	DIV		EBX
@@ -208,12 +213,14 @@ _displayLoop:
 
 _keepPrinting:
 	; check whether # displayed is == length array
-	CMP		ECX, ARRAYSIZE
+
+	MOV		EAX, [ESP+8]
+	CMP		ECX, EAX
 	JNE		_displayLoop
 
 	POP		EBP
 	CALL	CrLf
-	RET		16
+	RET		20
 
 displayList	ENDP
 
