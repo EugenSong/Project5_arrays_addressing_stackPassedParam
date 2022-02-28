@@ -20,7 +20,7 @@ HI = 50
 
 .data
 
-	intro1			BYTE	"The Birth of Sorted Random Number Integers! By Eugene",13,10,13,10, 0
+	intro1			BYTE	"The Birth of Sorted Random Integers! By Eugene...",13,10,13,10, 0
 	intro2			BYTE	"This program's objective is to pump out 200 random integers from 15 through 50. It will display ",13,10
 					BYTE	"and sort the original list containing the integers, display its median value, then rearrange ",13,10
 					BYTE	"and output the list in ascending order and finally show the number of instances of each ",13,10 
@@ -41,19 +41,29 @@ HI = 50
 
 .code
 main PROC
-	CALL	Randomize				; random seed 
+
+	CALL	Randomize				; plant random seed 
 	
-	; introduction
-	PUSH	OFFSET intro1			; push intro1 to stack
-	PUSH	OFFSET intro2			; push intro2 to stack
+	; ------------------------------------------------------------------
+    ; Introduces title of program, author, and objective. 
+    ; ----------------------------------------------------------
+	PUSH	OFFSET intro1			
+	PUSH	OFFSET intro2			
 	CALL	introduction
 
-	; fill array first
+	; ------------------------------------------------------------------------
+    ; Fills empty array, randArray, with random numbers using 
+    ;	RandomRange in any order.
+    ; ----------------------------------------------------------
 	PUSH	arrayCount			
-	PUSH	OFFSET randArray		; push empty array onto stack
+	PUSH	OFFSET randArray
 	CALL	fillArray
 
-	; display unsorted random nums 
+	; ------------------------------------------------------------------------
+    ; Displays the array of unsorted random numbers. The numbers are  
+	;	printed onto a new line after every 20 numbers with a space
+	;		in between each number.
+    ; --------------------------------------------------------------------
 	PUSH	OFFSET unsorted_label
 	PUSH	OFFSET randArray
 	PUSH	OFFSET space
@@ -61,17 +71,29 @@ main PROC
 	PUSH	arrayCount
 	CALL	displayList
 	
-	; sort list before outputting the median value
+	; ------------------------------------------------------------------------
+    ; The array filled with random numbers is sorted using a   
+	;		bubble-sort algorithm.
+    ; ------------------------------------------------------------------
 	PUSH	OFFSET randArray
 	PUSH	arrayCount
 	CALL	sortList
 
-	; display the median value of sorted random nums
+	; ---------------------------------------------------------------------------
+    ; Displays the median value of the sorted array. If there is an 
+	;		even number of numbers, the average of the middle two values with 
+	;			the inclusion of the round up estimate is displayed. 
+	;				If odd, the middle number is displayed.
+    ; ------------------------------------------------------------------------
 	PUSH	OFFSET median_label
 	PUSH	OFFSET randArray
 	CALL	displayMedian 
 
-	; display sorted random nums
+	; ------------------------------------------------------------------------
+    ; Displays the array of sorted random numbers. Again, the numbers   
+	;	are printed onto a new line after every 20 numbers with a 
+	;		space in between each number.
+    ; ---------------------------------------------------------------------
 	PUSH	OFFSET sorted_label
 	PUSH	OFFSET randArray
 	PUSH	OFFSET space
@@ -79,12 +101,21 @@ main PROC
 	PUSH	arrayCount
 	CALL	displayList
 	
-	; generate new array of counts
+	; ------------------------------------------------------------------------
+    ; Fills a second array, counts, with the number of occurrences of   
+	;	each unique value in the sorted array. The numbers are printed 
+	;		representing each number from LO through HI. 0 is also printed
+	;			for values with no occurences. 
+    ; -----------------------------------------------------------------------
 	PUSH	OFFSET randArray
 	PUSH	OFFSET counts
 	CALL	countList 
 
-	; display the new array of counts
+	; -----------------------------------------------------------------------
+    ; Displays the array of occurrences for each unique value from  
+	;	the sorted array. The numbers are also printed onto a new line 
+	;		after every 20 numbers with a space in between each number.
+    ; --------------------------------------------------------------------
 	PUSH	OFFSET instance_label
 	PUSH	OFFSET counts
 	PUSH	OFFSET space
@@ -93,11 +124,13 @@ main PROC
 	CALL	displayList
 	CALL	CrLf
 
-	; display good bye msg
+	; -----------------------------------------------
+    ; Displays a goodbye message.   
+    ; ----------------------------------
 	PUSH	OFFSET farewell_msg
 	CALL	goodBye
 	
-	Invoke ExitProcess,0			; exit to operating system
+	Invoke ExitProcess,0
 main ENDP
 
 introduction PROC
@@ -105,103 +138,101 @@ introduction PROC
 	PUSH	EBP						; Step 1) Preserve EBP
 	MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
 
-	MOV		EDX, [ESP+12]			; move +12 bytes from ESP to store intro1  [base + offset] 
+	MOV		EDX, [ESP+12]			; move +12 bytes from ESP to grab intro1  [base + offset] 
 	CALL	WriteString
 	XOR		EDX, EDX
-	MOV		EDX, [ESP+8]			; move +8 bytes from ESP to store intro2	[base + offset]
+	MOV		EDX, [ESP+8]			; move +8 bytes from ESP to grab intro2	[base + offset]
 	CALL	WriteString
 	XOR		EDX, EDX
 	
-	POP		EBP
+	POP		EBP						; POP EBP before RET
 	RET		8						; clears pre-call introduction parameters [stack pointer reset]
 
 introduction ENDP
 
 fillArray PROC
 
-	PUSH	EBP						; Step 1) Preserve EBP
-	MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
-
-	; generate arraySize-n random numbers
-
+	PUSH	EBP						
+	MOV		EBP, ESP
 	XOR		ECX, ECX
-_loopMe:
 
+_loopMe:
 	MOV		EAX, HI					; upper bound
 	ADD		EAX, 1					; EAX + 1 to include upper range
-	CALL	RandomRange				; takes EAX (upper); outputs new EAX 
-	MOV		EBX, LO
+	CALL	RandomRange				
+	MOV		EBX, LO					; lower bound
 	PUSH	EAX						; store seed value --> stack
 	MOV		EAX, HI
-	ADD		EAX, 1					; to include upper range again
-	SUB		EAX, EBX				; upper - lower --> EAX
+	ADD		EAX, 1					
+	SUB		EAX, EBX				
 
-		; switch EAX / EBX to prepare for div
+	; --------------------------------------------------------------------
+    ;	Switch EAX / EBX to prepare for div 
+	;		Algorithm to generate random num within range:
+	;			randomNum = seed % (upper-lower) + lower
+    ; -----------------------------------------------------------
 	MOV		EBX, EAX
-	POP		EAX						; popped off seed --> EAX 
+	POP		EAX	 
 
-		; EAX (seed) / EBX (upper-lower) at this point
+	; --------------- at this point, EAX (seed) / EBX (upper-lower) ----------
 	XOR		EDX, EDX
-	DIV		EBX						; randomNum = seed % (upper-lower) + lower
+	DIV		EBX						
 
 	MOV		EBX, LO
 	ADD		EDX, EBX		
 
-		; at this point, EDX has the randomNum btwn LO & HI
-
-	MOV		EAX, EDX				; EAX has randomNum btwn LO & HI
+	; ------------ at this point, EDX has the randomNum btwn LO & HI -------------
+	
+	MOV		EAX, EDX
 
 	; store/fill in array
 	MOV		EDI, [ESP+8]			; reference 1st address of randArray
-	MOV		[EDI + ECX * 4], EAX	; algorithm to store into each index of array 
+	MOV		[EDI+ECX*4], EAX		; algorithm to store into each index of array 
 	MOV		EBX, [ESP+12]			; move arrayCount --> EBX
 	INC		ECX
 
 	; compare to array length
 	CMP		ECX, EBX					
-	JNE		_loopMe					; if counter < array.length(randArray)
+	JNE		_loopMe					; if ECX (counter) < randArray.length()
 
 	POP		EBP
 	RET		12
 		
 fillArray ENDP
 
-displayList PROC
+displayList PROC 
 
-; ONLY ONE DISPLAYLIST PROC for 3 different arrays to print; therefore universally PUSH labels / values the 
-
-
-	PUSH	EBP						; Step 1) Preserve EBP
-	MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
-
-	; STACK
-	; --------------------------
-	; POP EBP
-	; RET ADDRESS
-	; NUM PER LINE
-	; OFFSET SPACE (" ")
-	; OFFSET ARRAY
-	; OFFSET LABEL
-
-	MOV		EDX, [ESP+24]			; LABEL OFFSET IS ALWAYS @ BOTTOM MOST OF STACK			
+	PUSH	EBP									; STACK
+	MOV		EBP, ESP							; ------- ESP ------------	
+												; POP EBP	
+												; RET ADDRESS
+												; SIZE OF ARRAY
+												; NUM PER LINE
+												; OFFSET SPACE (" ")
+												; OFFSET ARRAY
+												; OFFSET LABEL
+	MOV		EDX, [ESP+24]		
 	CALL	WriteString
-	XOR		ECX, ECX				; cleared ECX to start iteration
+	XOR		ECX, ECX
 
-	MOV		EDI, [ESP+20]			; reference 1st address of filled randArray into EDI
+	MOV		EDI, [ESP+20]
 
-	; begin iterating through and printing each value of array
+	; --------------------------------------------------------------------------------
+    ;	Start of loop to begin iterating through and printing each value of array
+    ; -----------------------------------------------------------------------------
 _displayLoop:
-	MOV		EAX, [EDI + ECX * 4]	; store each value of array into EAX to print
+	MOV		EAX, [EDI + ECX * 4]	; store each value of randArray into EAX to print
 	CALL	WriteDec
-	MOV		EDX, [ESP+16]			; create space after each number
+	MOV		EDX, [ESP+16]			; add space after each num
 	CALL	WriteString
 
-	XOR		EDX, EDX				; clear EDX to use in DIV
+	XOR		EDX, EDX
 
-	INC		ECX						; increment counter each time num is displayed
+	INC		ECX						; increment counter each time a num is displayed
 
-	; insert new lines here 
-
+	; -------------------------------
+    ;	Insert new line
+    ; ----------------------
 	MOV		EBX, [ESP+12]			; store numPerLine into EBX to use as divisor
 									; compare numPerLine after printing first num
 	MOV		EAX, ECX 
@@ -212,8 +243,8 @@ _displayLoop:
 	CALL	CrLf
 
 _keepPrinting:
-	; check whether # displayed is == length array
 
+	; check whether # displayed is == length array
 	MOV		EAX, [ESP+8]
 	CMP		ECX, EAX
 	JNE		_displayLoop
@@ -226,31 +257,23 @@ displayList	ENDP
 
 sortList PROC
 
-	; BUBBLE SORT (n^2) 
-	; NESTED LOOP
-
-	PUSH	EBP						; Step 1) Preserve EBP
-	MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
+	PUSH	EBP						
+	MOV		EBP, ESP
 
 	MOV		ECX, [ESP+8]			; store outer loop counter for bubble sort  
 	
-_outerLoop: ; do nothing except iterate through each index once 
-	
+	; for outer loop, iterate through each index once 
+_outerLoop:  
 	MOV		ESI, [ESP+12]			; syntax: MOV ESI, source_address (reference of first value) 
 	MOV		EDX, ECX				; stores ECX value into EDX 
-
 	MOV		ECX, [ESP+8]			; reset ECX's value to 200 after each outer iteration
 
 _innerLoop:	
-
-	; address of index 0 of filled array
-	MOV		EAX, [ESI]				; store first value into EAX to compare
-	MOV		EBX, [ESI+4]			; store second value into EBX to compare
-
+	MOV		EAX, [ESI]				; store first val
+	MOV		EBX, [ESI+4]			; store second val
 	CMP		EAX, EBX
 	JLE		_goBackUp
 
-	
 	PUSH	ESI						; push element one reference
 	ADD		ESI,4
 	PUSH	ESI						; push element two reference
@@ -258,14 +281,12 @@ _innerLoop:
 	
 	MOV		[ESI], EBX
 	MOV		[ESI+4], EAX
-
-	; swap elements
-	CALL	exchangeElements
+	CALL	exchangeElements		; swap elements
 	
 _goBackUp:
 
 	ADD		ESI, 4					; increment by 4 memory addresses once nums have been checked
-	CMP		ECX, 1h				; only want to iterate through innerLoop 199 times so I don't go out of array range
+	CMP		ECX, 1h					; iterate (arraySize-1) times so I don't go out of array range
 	JE		_exitInner
 	LOOP	_innerLoop				
 
@@ -281,8 +302,9 @@ sortList ENDP
 
 exchangeElements PROC
 
-	PUSH	EBP							; standard ebp push
-	MOV		EBP, ESP					; standard static base pointer
+	PUSH	EBP							
+	MOV		EBP, ESP					
+
 	MOV		EAX, [ESP+12]				; grab ESI location 
 	MOV		EBX, [ESP+8]				; grab ESI + 4 location 
 
@@ -294,7 +316,7 @@ exchangeElements PROC
 	MOV		EAX, [EBX]
 	POP		EBX
 
-; exchange the two values 
+; swap the two values in registers
 	XCHG	EBX, EAX
 
 ; store back into respective array slots
@@ -307,14 +329,18 @@ exchangeElements ENDP
 
 displayMedian PROC
 
-	PUSH	EBP						; Step 1) Preserve EBP
-	MOV		EBP, ESP				; Step 2) Assign static stack-frame pointer
-
+	PUSH	EBP						
+	MOV		EBP, ESP	
+	
+	; display median label
 	MOV		EDX, [EBP+12]			
 	CALL	WriteString
 
-	; check length of array size
-	XOR		EDX, EDX				; clear EDX to use for div
+	; -------------------------------------------------------
+    ;	Check length of ARRAYSIZE...
+	;		Adjust accordingly if even or odd
+    ; --------------------------------------------
+	XOR		EDX, EDX
 	MOV		EAX, ARRAYSIZE	
 	MOV		EBX, 2
 	DIV		EBX						 
@@ -324,16 +350,16 @@ displayMedian PROC
 
 	; do odd
 	XOR		EDX, EDX
-	MOV		EDI, [ESP+8]			; reference 1st address of filled randArray into EDI
+	MOV		EDI, [ESP+8]			; reference ADDRESS of filled randArray into EDI
 	DEC		EAX
-	MOV		EAX, [EDI + EAX * 4]	; move [4 x index number] places in the array (middle value since odd)
+	MOV		EAX, [EDI + EAX * 4]	; move [4*index number] places in the array (middle value since odd)
 	CALL	WriteDec							
 	JMP		_finish
 
 _evenNum:
 	; do even
 	XOR		EDX, EDX
-	MOV		EDI, [ESP+8]			; reference 1st address of filled randArray into EDI
+	MOV		EDI, [ESP+8]			
 	PUSH	EAX
 	DEC		EAX
 	MOV		EAX, [EDI + EAX * 4]	;  store (arrayCount / 2)-nth index value 
@@ -346,7 +372,7 @@ _evenNum:
 
 	CMP		EDX, 0
 	JE		_noAdd
-	INC		EAX						; half- round up here 
+	INC		EAX						; account for half-round up here 
 	CALL	WriteDec
 	JMP		_finish
 
@@ -354,7 +380,6 @@ _noAdd:
 	CALL	WriteDec
 
 _finish:
-
 	CALL	CrLf
 	CALL	CrLf
 	POP		EBP
@@ -362,83 +387,70 @@ _finish:
 
 displayMedian ENDP
 
-
-
-
-
-
-
-
 countList PROC
 
 	PUSH	EBP
 	MOV		EBP, ESP
 
-	MOV		EDI, [EBP+8]					; reference countArray address 0 (EDI)
-	MOV		ESI, [EBP+12]					; reference randArray address 0 (ESI)			
+	MOV		EDI, [EBP+8]					; reference countArray ADDRESS (EDI)
+	MOV		ESI, [EBP+12]					; reference randArray ADDRESS (ESI)			
 
 	MOV		EBX, 0							
 	PUSH	EBX
 	
 	MOV		EAX, LO
-	MOV		EBX, 0							; initialize counter (EBX)
-	MOV		ECX, 0					; # times I loop when checking occurence of each value
+	MOV		EBX, 0							; clear counter (EBX)
+	MOV		ECX, 0							; clear counter that loops through each value
 
-	; BLOCK OF CODE TO ITERATE THRU randArray and compare value of first element in EAX
+	; --------------------------------------------------------------------
+    ; Block of code to iterate through randArray and compare value
+    ;     of first element in EAX. If equal, increment counter. 
+    ; --------------------------------------------------------------------
 _top:
 
 	CMP		EAX, [ESI+ECX*4]
-
-	; code for if EAX is equal to the value we check
 	JNE		_middle
-	INC		EBX								; counter++ if EAX == ESI+ECX*4
+	INC		EBX								; if EAX == to the value in sorted array [ESI+ECX*4]
 	
+	; ------------------------------------------------------------------------
+    ; Code to see which value is being compared between EAX and ECX   
+    ; ------------------------------------------------------------------------
 _middle:
-
-	; block of code to replace EDI (countArray)
-
 	INC		ECX
 	CMP		ECX, ARRAYSIZE
 	JNE		_top							; check only from 0 through ARRAYCOUNT b/c [ESI] is index 0
-
 	XOR		ECX, ECX						; clear ECX since we've already looped thru entire randArray to check
 
-	; code to store EBX (# of counts) into countArray
-
-	; THIS POINT: HAVE EBX = number of counts 
+	; ----------------------------------------------------
+    ; Store EBX (# of counts) into counts array  
+    ; -----------------------------------------------
 	POP		ECX
 	MOV		[EDI+ECX*4], EBX				;each time <-- counter == # of indices 
 	INC		ECX
 	PUSH	ECX
 
 _nextNum:
-
 	INC		EAX								; holds LO through HI
 	XOR		EBX, EBX						; clear EBX (counter) to use for next num 
 
 	XOR		EDX, EDX
 	MOV		EDX, HI
 	CMP		EAX, EDX
-	JNG		_top							; or maybe _middle
-											; use (jmp not greater) b/c INC EBX will 50 -> 51 then check 50 
-_finish:
+	JNG		_top							; JNG b/c INC EAX will 50 -> 51 then check 50 
 
+_finish:
 	POP		EBX
 	POP		EBP
 	RET		8
 
 countList ENDP
 
-
-
-
-
-
 goodBye PROC
 
 	PUSH	EBP
 	MOV		EBP, ESP
 
+	; store farewell string into EDX
 	XOR		EDX, EDX
 	MOV		EDX, [ESP+8]
 	CALL	WriteString
