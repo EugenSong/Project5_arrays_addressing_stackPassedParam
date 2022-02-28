@@ -359,6 +359,9 @@ displayMedian ENDP
 
 
 
+
+
+
 countList PROC
 
 	PUSH	EBP
@@ -406,6 +409,7 @@ _nextNum:
 	INC		EAX								; holds LO through HI
 	XOR		EBX, EBX						; clear EBX (counter) to use for next num 
 
+	XOR		EDX, EDX
 	MOV		EDX, HI
 	CMP		EAX, EDX
 	JNG		_top							; or maybe _middle
@@ -417,6 +421,11 @@ _finish:
 	RET		8
 
 countList ENDP
+
+
+
+
+
 
 goodBye PROC
 

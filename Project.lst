@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 16:10:15
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 16:29:46
 <Arrays, Addressing, and Stack-Passed Parameters     (Proj5_  Page 1 - 1
 
 
@@ -229,7 +229,7 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 16:10:15
 
 					; display good bye msg
  000000A0  68 0000023D R		PUSH	OFFSET farewell_msg
- 000000A5  E8 000001BB			CALL	goodBye
+ 000000A5  E8 000001BD			CALL	goodBye
 					
 					Invoke ExitProcess,0			; exit to operating system
  000000AA  6A 00	   *	    push   +000000000h
@@ -500,6 +500,9 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 16:10:15
 
 
 
+
+
+
  0000021F			countList PROC
 
  0000021F  55				PUSH	EBP
@@ -547,34 +550,40 @@ Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 16:10:15
  00000254  40				INC		EAX								; holds LO through HI
  00000255  33 DB			XOR		EBX, EBX						; clear EBX (counter) to use for next num 
 
- 00000257  BA 00000032			MOV		EDX, HI
- 0000025C  3B C2			CMP		EAX, EDX
- 0000025E  7E DD			JNG		_top							; or maybe _middle
+ 00000257  33 D2			XOR		EDX, EDX
+ 00000259  BA 00000032			MOV		EDX, HI
+ 0000025E  3B C2			CMP		EAX, EDX
+ 00000260  7E DB			JNG		_top							; or maybe _middle
 															; use (jmp not greater) b/c INC EBX will 50 -> 51 then check 50 
- 00000260			_finish:
+ 00000262			_finish:
 
- 00000260  5B				POP		EBX
- 00000261  5D				POP		EBP
- 00000262  C2 0008			RET		8
+ 00000262  5B				POP		EBX
+ 00000263  5D				POP		EBP
+ 00000264  C2 0008			RET		8
 
- 00000265			countList ENDP
+ 00000267			countList ENDP
 
- 00000265			goodBye PROC
 
- 00000265  55				PUSH	EBP
- 00000266  8B EC			MOV		EBP, ESP
 
- 00000268  33 D2			XOR		EDX, EDX
- 0000026A  8B 54 24 08			MOV		EDX, [ESP+8]
- 0000026E  E8 00000000 E		CALL	WriteString
+
+
+
+ 00000267			goodBye PROC
+
+ 00000267  55				PUSH	EBP
+ 00000268  8B EC			MOV		EBP, ESP
+
+ 0000026A  33 D2			XOR		EDX, EDX
+ 0000026C  8B 54 24 08			MOV		EDX, [ESP+8]
+ 00000270  E8 00000000 E		CALL	WriteString
 					
- 00000273  5D				POP		EBP
- 00000274  C2 0004			RET		4
+ 00000275  5D				POP		EBP
+ 00000276  C2 0004			RET		4
 
- 00000277			goodBye ENDP
+ 00000279			goodBye ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 16:10:15
+Microsoft (R) Macro Assembler Version 14.29.30139.0	    02/27/22 16:29:46
 <Arrays, Addressing, and Stack-Passed Parameters     (Proj5_  Symbols 2 - 1
 
 
@@ -669,7 +678,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000619 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000277 Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000279 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -776,11 +785,11 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-countList  . . . . . . . . . . .	P Near	 0000021F _TEXT	Length= 00000046 Public STDCALL
+countList  . . . . . . . . . . .	P Near	 0000021F _TEXT	Length= 00000048 Public STDCALL
   _top . . . . . . . . . . . . .	L Near	 0000023D _TEXT	
   _middle  . . . . . . . . . . .	L Near	 00000243 _TEXT	
   _nextNum . . . . . . . . . . .	L Near	 00000254 _TEXT	
-  _finish  . . . . . . . . . . .	L Near	 00000260 _TEXT	
+  _finish  . . . . . . . . . . .	L Near	 00000262 _TEXT	
 displayList  . . . . . . . . . .	P Near	 00000114 _TEXT	Length= 00000049 Public STDCALL
   _displayLoop . . . . . . . . .	L Near	 00000126 _TEXT	
   _keepPrinting  . . . . . . . .	L Near	 0000014C _TEXT	
@@ -791,7 +800,7 @@ displayMedian  . . . . . . . . .	P Near	 000001B8 _TEXT	Length= 00000067 Public 
 exchangeElements . . . . . . . .	P Near	 0000019B _TEXT	Length= 0000001D Public STDCALL
 fillArray  . . . . . . . . . . .	P Near	 000000CE _TEXT	Length= 00000046 Public STDCALL
   _loopMe  . . . . . . . . . . .	L Near	 000000D3 _TEXT	
-goodBye  . . . . . . . . . . . .	P Near	 00000265 _TEXT	Length= 00000012 Public STDCALL
+goodBye  . . . . . . . . . . . .	P Near	 00000267 _TEXT	Length= 00000012 Public STDCALL
 introduction . . . . . . . . . .	P Near	 000000B1 _TEXT	Length= 0000001D Public STDCALL
 main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000B1 Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
